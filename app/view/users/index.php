@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../../functions.php';
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">x
   <title>Cinema Tix</title>
   <link rel="icon" type="images/png" href="tix_logo.png">
   <style>
@@ -39,7 +39,7 @@ require_once __DIR__ . '/../../../functions.php';
     .logo {
       font-size: 24px;
       font-weight: bold;
-      color: #ffcc00;
+      color: #ffd700;
       cursor: pointer;
     }
 
@@ -57,7 +57,8 @@ require_once __DIR__ . '/../../../functions.php';
       transition: color 0.3s;
     }
 
-    .nav-links a:hover {
+    .nav-links a:hover,
+    .nav-links a.active {
       color: #ffcc00;
     }
 
@@ -527,10 +528,10 @@ require_once __DIR__ . '/../../../functions.php';
 
     <nav>
       <ul class="nav-links" id="nav-links">
-        <li><a href="#">Home</a></li>
+        <li><a href="#" class="active">Home</a></li>
         <li><a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a></li>
-        <li><a href="#movies">Sedang Tayang</a></li>
-        <li><a href="#news">Berita & Event</a></li>
+        <li><a href="index.php#movies">Sedang Tayang</a></li>
+        <li><a href="index.php?controller=user&action=beritaEvent">Berita & Event</a></li>
       </ul>
     </nav>
 
@@ -558,13 +559,13 @@ require_once __DIR__ . '/../../../functions.php';
     <div class="hero-content">
       <h1>Nikmati Pengalaman Nonton<br>Terbaik<br>Tanpa Antri di Bioskop</h1>
       <p>Temukan film terbaru dan jadwal bioskop favoritmu.</p>
-      <a href="#" class="btn-primary">Pesan Tiket Sekarang</a>
+      <a href="index.php?controller=user&action=pesanan" class="btn-primary">Pesan Tiket Sekarang</a>
     </div>
   </section>
 
   <main class="container">
     <section id="movies" class="section">
-      <h2 class="section-title">Film Sedang Tayang</h2>
+      <h2 class="section-title">Film Ter-hits Bulan Ini</h2>
       <?php if (isset($films) && !empty($films)): ?>
         <div class="movies-grid">
           <?php foreach ($films as $film): ?>
@@ -590,6 +591,12 @@ require_once __DIR__ . '/../../../functions.php';
             </article>
           <?php endforeach; ?>
         </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="index.php?controller=user&action=pesanan" class="btn-primary"
+            style="padding: 12px 25px; font-size: 16px;">
+            Lihat Film Lainnya
+          </a>
+        </div>
       <?php else: ?>
         <div style="text-align: center; padding: 40px; color: #ccc;">
           <p style="font-size: 18px; margin-bottom: 15px;">😔 Tidak ada film yang sedang tayang</p>
@@ -611,6 +618,12 @@ require_once __DIR__ . '/../../../functions.php';
               <p><?= htmlspecialchars($item['deskripsi_news']); ?></p>
             </article>
           <?php endforeach; ?>
+        </div>
+        <div style="text-align: center; margin-top: 30px;">
+          <a href="index.php?controller=user&action=beritaEvent" class="btn-primary"
+            style="padding: 12px 25px; font-size: 16px;">
+            Tampilkan Berita Lebih Banyak
+          </a>
         </div>
       <?php else: ?>
         <div style="text-align: center; padding: 40px; color: #ccc;">

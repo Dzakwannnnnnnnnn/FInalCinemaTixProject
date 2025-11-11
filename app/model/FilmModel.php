@@ -30,7 +30,7 @@ class FilmModel
   }
 
   // Add new film
-  public function addFilm($judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url)
+  public function addFilm($judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating = null)
   {
     $query = "INSERT INTO film (judul, genre, durasi, rating_usia, deskripsi, poster_url) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = $this->db->getConnection()->prepare($query);
@@ -38,7 +38,7 @@ class FilmModel
   }
 
   // Update film
-  public function updateFilm($id, $judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url)
+  public function updateFilm($id, $judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating = null)
   {
     $query = "UPDATE film SET judul = ?, genre = ?, durasi = ?, rating_usia = ?, deskripsi = ?, poster_url = ? WHERE film_id = ?";
     $stmt = $this->db->getConnection()->prepare($query);
@@ -78,6 +78,25 @@ class FilmModel
     $stmt = $this->db->getConnection()->prepare($query);
     $searchTerm = "%$keyword%";
     $stmt->execute([$searchTerm, $searchTerm]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  // Get films by rating usia
+  public function getFilmsByRatingUsia($ratingUsia)
+  {
+    $query = "SELECT * FROM film WHERE rating_usia = ? ORDER BY film_id DESC";
+    $stmt = $this->db->getConnection()->prepare($query);
+    $stmt->execute([$ratingUsia]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
+  // Get films by genre
+  public function getFilmsByGenre($genre)
+  {
+    $query = "SELECT * FROM film WHERE genre LIKE ? ORDER BY film_id DESC";
+    $stmt = $this->db->getConnection()->prepare($query);
+    $searchTerm = "%$genre%";
+    $stmt->execute([$searchTerm]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 }

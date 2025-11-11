@@ -87,13 +87,13 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="index.php?controller=admin&action=pesananTiket" class="nav-link">
-            🎫 Booking
+          <a href="index.php?controller=admin&action=bookings" class="nav-link">
+            🎫 Bookings
           </a>
         </li>
         <li class="nav-item">
-          <a href="index.php?controller=admin&action=pembayaran" class="nav-link">
-            💳 Pembayaran
+          <a href="index.php?controller=admin&action=payments" class="nav-link">
+            💳 Payments
           </a>
         </li>
         <li class="nav-item">
@@ -102,6 +102,11 @@
           </a>
         </li>
         <li class="nav-item mt-4">
+          <a href="index.php" class="nav-link text-success">
+            👤 Kembali ke User
+          </a>
+        </li>
+        <li class="nav-item">
           <a href="index.php?controller=auth&action=logout" class="nav-link text-danger">
             🚪 Logout
           </a>
@@ -118,6 +123,9 @@
           <p class="text-muted mb-0">Selamat datang, <?= htmlspecialchars($_SESSION['user_name'] ?? 'Admin') ?>!</p>
         </div>
         <div class="text-end">
+          <a href="index.php" class="btn btn-success me-2">
+            👤 Kembali ke User
+          </a>
           <span class="badge bg-warning text-dark">Admin</span>
         </div>
       </div>

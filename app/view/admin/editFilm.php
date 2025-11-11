@@ -118,9 +118,10 @@
       <?php
       $flash = getFlashMessage();
       if ($flash): ?>
-        <div class="alert alert-<?= $flash['type'] === 'success' ? 'success' : 'danger' ?> alert-dismissible fade show"
+        <div
+          class="alert alert-<?php echo $flash['type'] === 'success' ? 'success' : 'danger'; ?> alert-dismissible fade show"
           role="alert">
-          <?= htmlspecialchars($flash['message']) ?>
+          <?php echo htmlspecialchars($flash['message']); ?>
           <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
       <?php endif; ?>
@@ -130,49 +131,50 @@
         <div class="col-md-8">
           <div class="card shadow-sm">
             <div class="card-body p-4">
-              <form action="index.php?controller=admin&action=editFilm&id=<?= $film['film_id'] ?>" method="POST"
+              <form action="index.php?controller=admin&action=editFilm&id=<?php echo $film['film_id']; ?>" method="POST"
                 enctype="multipart/form-data">
                 <div class="mb-3">
                   <label for="judul" class="form-label fw-semibold">Judul Film *</label>
                   <input type="text" class="form-control" id="judul" name="judul"
-                    value="<?= htmlspecialchars($film['judul']) ?>" required>
+                    value="<?php echo htmlspecialchars($film['judul']); ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="genre" class="form-label fw-semibold">Genre *</label>
                   <input type="text" class="form-control" id="genre" name="genre"
-                    value="<?= htmlspecialchars($film['genre']) ?>" required>
+                    value="<?php echo htmlspecialchars($film['genre']); ?>" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="durasi" class="form-label fw-semibold">Durasi (menit) *</label>
                   <input type="number" class="form-control" id="durasi" name="durasi"
-                    value="<?= htmlspecialchars($film['durasi']) ?>" min="1" required>
+                    value="<?php echo htmlspecialchars($film['durasi']); ?>" min="1" required>
                 </div>
 
                 <div class="mb-3">
                   <label for="rating_usia" class="form-label fw-semibold">Rating Usia *</label>
                   <select class="form-select" id="rating_usia" name="rating_usia" required>
                     <option value="">-- Pilih Rating Usia --</option>
-                    <option value="SU" <?= $film['rating_usia'] === 'SU' ? 'selected' : '' ?>>SU (Semua Umur)</option>
-                    <option value="13+" <?= $film['rating_usia'] === '13+' ? 'selected' : '' ?>>13+</option>
-                    <option value="17+" <?= $film['rating_usia'] === '17+' ? 'selected' : '' ?>>17+</option>
-                    <option value="21+" <?= $film['rating_usia'] === '21+' ? 'selected' : '' ?>>21+</option>
+                    <option value="SU" <?php echo $film['rating_usia'] === 'SU' ? 'selected' : ''; ?>>SU (Semua Umur)
+                    </option>
+                    <option value="13+" <?php echo $film['rating_usia'] === '13+' ? 'selected' : ''; ?>>13+</option>
+                    <option value="17+" <?php echo $film['rating_usia'] === '17+' ? 'selected' : ''; ?>>17+</option>
+                    <option value="21+" <?php echo $film['rating_usia'] === '21+' ? 'selected' : ''; ?>>21+</option>
                   </select>
                 </div>
 
                 <div class="mb-3">
                   <label for="deskripsi" class="form-label fw-semibold">Deskripsi</label>
                   <textarea class="form-control" id="deskripsi" name="deskripsi"
-                    rows="4"><?= htmlspecialchars($film['deskripsi'] ?? '') ?></textarea>
+                    rows="4"><?php echo htmlspecialchars($film['deskripsi'] ?? ''); ?></textarea>
                 </div>
 
                 <div class="mb-3">
                   <label class="form-label fw-semibold">Poster Saat Ini</label>
                   <div class="mb-2">
                     <?php if (!empty($film['poster_url'])): ?>
-                      <img src="public/uploads/<?= htmlspecialchars($film['poster_url']) ?>" width="150" height="200"
-                        class="rounded shadow-sm" alt="Poster" style="object-fit: cover;">
+                      <img src="public/uploads/<?php echo htmlspecialchars($film['poster_url']); ?>" width="150"
+                        height="200" class="rounded shadow-sm" alt="Poster" style="object-fit: cover;">
                     <?php else: ?>
                       <div class="bg-secondary rounded d-flex align-items-center justify-content-center"
                         style="width: 150px; height: 200px;">

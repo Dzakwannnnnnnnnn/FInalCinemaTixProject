@@ -44,7 +44,7 @@ class UserModel
 
   public function getAllUsers()
   {
-    $query = "SELECT user_id, nama, email, no_hp, role, created_at FROM users ORDER BY created_at DESC";
+    $query = "SELECT user_id, nama, email, no_hp, role FROM users ORDER BY user_id DESC";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

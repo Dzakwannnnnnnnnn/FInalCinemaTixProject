@@ -42,6 +42,7 @@
       color: #ffd700;
       font-weight: 700;
       font-size: 1.5rem;
+      cursor: pointer;
     }
 
     nav a {
@@ -50,7 +51,8 @@
       transition: 0.3s;
     }
 
-    nav a:hover {
+    nav a:hover,
+    nav a.active {
       color: #ffd700;
     }
 
@@ -178,14 +180,25 @@
 
   <!-- HEADER -->
   <header>
-    <div class="logo">Cinematix</div>
+    <div class="logo" onclick="window.location.href='index.php'">Cinematix</div>
     <nav>
-      <a href="#">Home</a>
-      <a href="#">Pemesanan Tiket</a>
-      <a href="#">Sedang Tayang</a>
-      <a href="#">Berita & Event</a>
+      <a href="index.php">Home</a>
+      <a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a>
+      <a href="index.php?controller=user&action=tayang" style="color:#ffd700;">Sedang Tayang</a>
+      <a href="index.php?controller=user&action=beritaEvent">Berita & Event</a>
     </nav>
-    <a href="#" class="btn-login">Masuk / Daftar</a>
+    <?php if (isLoggedIn()): ?>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span style="color: #ddd; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+        <?php if (isAdmin()): ?>
+          <a href="index.php?controller=admin&action=index" class="btn-login"
+            style="background: #ffd700; color: #111; padding: 8px 15px;">Admin Panel</a>
+        <?php endif; ?>
+        <a href="index.php?controller=auth&action=logout" class="btn-login">Logout</a>
+      </div>
+    <?php else: ?>
+      <a href="index.php?controller=auth&action=login" class="btn-login">Masuk / Daftar</a>
+    <?php endif; ?>
   </header>
 
   <!-- SECTION FILM -->

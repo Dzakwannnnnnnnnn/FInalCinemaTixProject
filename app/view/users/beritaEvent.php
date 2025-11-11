@@ -1,5 +1,10 @@
+<?php
+// Pastikan path ini sesuai dengan struktur folder Anda
+require_once __DIR__ . '/../../../functions.php';
+?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -35,6 +40,7 @@
       font-size: 24px;
       font-weight: bold;
       color: #ffcc00;
+      cursor: pointer;
     }
 
     .nav-links {
@@ -50,7 +56,8 @@
       transition: color 0.3s;
     }
 
-    .nav-links a:hover {
+    .nav-links a:hover,
+    .nav-links a.active {
       color: #ffcc00;
     }
 
@@ -119,27 +126,13 @@
       font-weight: 700;
       margin-bottom: 10px;
       line-height: 1.3;
-    }
-
-    .news-title:hover {
-      color: #ffcc00;
-      cursor: pointer;
+      color: #111;
     }
 
     .news-meta {
       font-size: 13px;
       color: #555;
       margin-bottom: 12px;
-    }
-
-    .news-meta a {
-      color: #287bff;
-      text-decoration: none;
-      font-weight: 600;
-    }
-
-    .news-meta a:hover {
-      text-decoration: underline;
     }
 
     .news-desc {
@@ -192,57 +185,97 @@
       padding: 25px;
       margin-top: 60px;
     }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        padding: 120px 20px 40px;
+        gap: 30px;
+      }
+
+      .sidebar {
+        border-left: none;
+        border-top: 1px solid #ddd;
+        padding-left: 0;
+        padding-top: 30px;
+      }
+
+      .navbar {
+        padding: 15px 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+    }
   </style>
 </head>
+
 <body>
   <header class="navbar">
-    <div class="logo" onclick="window.location.href='index.php'" style="cursor:pointer;">Cinematix</div>
+    <div class="logo" onclick="window.location.href='index.php'">Cinematix</div>
     <nav>
       <ul class="nav-links">
         <li><a href="index.php">Home</a></li>
-        <li><a href="#">Pemesanan Tiket</a></li>
-        <li><a href="#">Sedang Tayang</a></li>
-        <li><a href="beritaEvent.html" style="color:#ffcc00;">Berita & Event</a></li>
+        <li><a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a></li>
+        <li><a href="index.php?controller=user&action=tayang">Sedang Tayang</a></li>
+        <li><a href="index.php?controller=user&action=beritaEvent" style="color:#ffcc00;">Berita & Event</a></li>
       </ul>
     </nav>
-    <a href="#" class="btn-login" onclick="window.location.href='loginUser.php'">Masuk / Daftar</a>
+    <?php if (isLoggedIn()): ?>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span style="color: #fff; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+        <?php if (isAdmin()): ?>
+          <a href="index.php?controller=admin&action=index" class="btn-login"
+            style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>
+        <?php endif; ?>
+        <a href="index.php?controller=auth&action=logout" class="btn-login">Logout</a>
+      </div>
+    <?php else: ?>
+      <a href="index.php?controller=auth&action=login" class="btn-login">Masuk / Daftar</a>
+    <?php endif; ?>
   </header>
 
   <main class="container">
     <div class="main-news">
-      <div class="news-card">
-        <img src="star.jpg" alt="The Smashing Machine" />
-        <div class="news-content">
-          <div class="category">TIX NOW</div>
-          <div class="news-title">Dwayne Johnson Banjir Pujian di Film ‘The Smashing Machine’</div>
-          <div class="news-meta">by <a href="#">TIX ID Admin</a> – October 13, 2025</div>
-          <div class="news-desc">
-            Penggemar film di Tanah Air kini bisa menyaksikan transformasi mengejutkan dari Dwayne “The Rock” Johnson dalam film biografi yang sangat dinanti *The Smashing Machine*.
+      <?php if (isset($news) && !empty($news)): ?>
+        <?php foreach ($news as $item): ?>
+          <div class="news-card">
+            <?php if (!empty($item['foto_news'])): ?>
+              <img src="public/uploads/<?= htmlspecialchars($item['foto_news']) ?>"
+                alt="<?= htmlspecialchars($item['judul_news']) ?>" />
+            <?php else: ?>
+              <img src="https://via.placeholder.com/400x220/333/fff?text=Berita+Tidak+Tersedia" alt="No Image" />
+            <?php endif; ?>
+            <div class="news-content">
+              <div class="category">CINEMATIX NEWS</div>
+              <div class="news-title"><?= htmlspecialchars($item['judul_news']) ?></div>
+              <div class="news-meta">by Cinematix Admin – <?= date('F j, Y') ?></div>
+              <div class="news-desc">
+                <?= htmlspecialchars(substr($item['deskripsi_news'], 0, 150)) ?>...
+              </div>
+            </div>
           </div>
+        <?php endforeach; ?>
+      <?php else: ?>
+        <div style="grid-column: 1 / -1; text-align: center; padding: 60px; color: #666;">
+          <h3 style="font-size: 24px; margin-bottom: 15px;">📄 Belum ada berita tersedia</h3>
+          <p style="font-size: 16px;">Silakan check kembali nanti untuk update berita terbaru.</p>
         </div>
-      </div>
-
-      <div class="news-card">
-        <img src="dune.jpg" alt="Luna Maya dan Yasmin Napper" />
-        <div class="news-content">
-          <div class="category">TIX NOW</div>
-          <div class="news-title">Luna Maya dan Yasmin Napper Jadi Produser di Film Sosok Ketiga: Lintrik</div>
-          <div class="news-meta">by <a href="#">TIX ID Admin</a> – October 10, 2025</div>
-          <div class="news-desc">
-            Film horor *Sosok Ketiga: Lintrik* yang dijadwalkan tayang 6 November 2025 ini merupakan proyek ambisius baru dari LEO Pictures, disutradarai oleh Fajar Nugros.
-          </div>
-        </div>
-      </div>
+      <?php endif; ?>
     </div>
 
     <aside class="sidebar">
-      <h3>More News</h3>
+      <h3>Berita Terbaru</h3>
       <ul>
-        <li><a href="#">Dwayne Johnson Banjir Pujian di Film ‘The Smashing Machine’</a></li>
-        <li><a href="#">Luna Maya dan Yasmin Napper Jadi Produser di Film Sosok Ketiga: Lintrik</a></li>
-        <li><a href="#">Rehat Sejenak Bersama Ubur-Ubur Cantik di Jakarta Aquarium Safari</a></li>
-        <li><a href="#">TRON: ARES, Masuki Petualangan Baru di Dunia Neon</a></li>
-        <li><a href="#">Rest Area, Teror Hantu Keresek yang Mengerikan!</a></li>
+        <?php if (isset($news) && !empty($news)): ?>
+          <?php foreach (array_slice($news, 0, 5) as $item): ?>
+            <li><a href="#"><?= htmlspecialchars($item['judul_news']) ?></a></li>
+          <?php endforeach; ?>
+        <?php else: ?>
+          <li><a href="#">Tidak ada berita terbaru</a></li>
+        <?php endif; ?>
       </ul>
     </aside>
   </main>
@@ -251,4 +284,5 @@
     © 2025 Cinematix — Semua Hak Dilindungi
   </footer>
 </body>
+
 </html>

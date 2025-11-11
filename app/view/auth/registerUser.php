@@ -61,7 +61,8 @@
       transition: color 0.3s;
     }
 
-    .nav-links a:hover {
+    .nav-links a:hover,
+    .nav-links a.active {
       color: #ffcc00;
     }
 

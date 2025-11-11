@@ -1,51 +1,25 @@
-# CinemaTix Project Completion TODO
+# CinemaTix Enhanced Booking Flow Implementation
 
-## 1. User Authentication System
-- [x] Implement session management in functions.php or separate Session class
-- [x] Complete AuthController: login, register, logout methods
-- [x] Update loginUser.php and registerUser.php views with proper forms
-- [x] Add password hashing (bcrypt) in UserModel
-- [x] Add validation and error handling for auth forms
-- [x] Protect routes that require authentication
-
-## 2. Admin Panel CRUD Operations
-- [x] Film CRUD: Create, Read, Update, Delete films with image upload
-- [x] News CRUD: Create, Read, Update, Delete news with image upload
-- [x] User Management: View, edit, delete users (admin only)
-- [ ] Schedule Management: Add/edit showtimes for films
-- [ ] Studio Management: Add/edit studios and seats
-- [x] Complete AdminController methods
-- [x] Update admin views (panelAdmin.php, Tambah.php, hapus.php)
-
-## 3. Booking System
-- [ ] Film detail page with schedule selection
-- [ ] Seat selection interface
-- [ ] Booking creation and payment simulation
-- [ ] Booking history for users
-- [ ] Update BookingController and BookingModel
-- [ ] Handle seat availability and booking conflicts
-
-## 4. File Upload Handling
-- [ ] Implement secure image upload for posters and news
-- [ ] Validate file types, sizes, and prevent malicious uploads
-- [ ] Store uploaded files in public/uploads/ with proper naming
-
-## 5. Views and Frontend
-- [ ] Ensure all views are properly connected to controllers
-- [ ] Add pagination for films and news lists
-- [ ] Implement search and filter functionality
-- [ ] Fix responsive design issues
-- [ ] Add loading states and error messages
-
-## 6. Security and Validation
-- [ ] Add CSRF protection
-- [ ] Sanitize all user inputs
-- [ ] Implement proper error handling and logging
-- [ ] Add role-based access control (user vs admin)
-
-## 7. Testing and Finalization
-- [ ] Test complete user flow: Register -> Login -> Browse -> Book
-- [ ] Test admin flow: Login -> Manage content -> View bookings
-- [ ] Fix any bugs and edge cases
-- [ ] Optimize database queries
-- [ ] Final code cleanup and documentation
+## Tasks
+- [x] Update database schema to include payment methods and e-ticket details
+- [x] Create StudioModel.php for studio management
+- [x] Create PaymentModel.php for payment handling
+- [x] Update BookingModel.php to handle multiple seats per booking
+- [x] Modify BookingController.php to handle enhanced booking flow:
+  - Schedule selection
+  - Seat selection with quantity
+  - Payment method selection
+  - Payment processing
+  - E-ticket generation
+- [x] Create app/view/users/schedule_selection.php for schedule selection
+- [x] Update app/view/users/seat_selection.php for multiple seat selection
+- [x] Create app/view/users/payment_method.php for payment method selection
+- [x] Create app/view/users/payment.php for payment processing
+- [x] Create app/view/users/e_ticket.php for e-ticket display with barcode
+- [x] Install barcode generation library (e.g., picqer/php-barcode-generator)
+- [x] Add admin features for studio management
+- [x] Add admin features for schedule management
+- [x] Add admin features for seat management
+- [ ] Add admin features for booking management
+- [ ] Add admin features for payment management
+- [x] Test the complete booking flow

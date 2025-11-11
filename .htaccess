@@ -1,0 +1,14 @@
+#Activate ModRewrite
+RewriteEngine On
+
+#let the folders and files to be access
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+#Rewrite URL
+RewriteRule ^(.*)$ index.php?route=$1 [QSA,L]
+
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?page=$1 [L,QSA]

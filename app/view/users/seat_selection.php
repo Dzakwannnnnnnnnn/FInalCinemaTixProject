@@ -135,6 +135,8 @@ require_once __DIR__ . '/../../../functions.php';
       flex-direction: column;
       align-items: center;
       gap: 20px;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .seat-row {
@@ -166,29 +168,31 @@ require_once __DIR__ . '/../../../functions.php';
       color: #fff;
     }
 
+    .seat.available {
+      background-color: #2ecc71;
+      /* Hijau untuk kursi tersedia */
+      border-color: #27ae60;
+    }
+
     .seat.available:hover {
       border-color: #ffcc00;
-      background-color: #ffcc00;
+      background-color: #27ae60;
       color: #000;
     }
 
     .seat.selected {
-      background-color: #ffcc00;
-      border-color: #ffcc00;
-      color: #000;
+      background-color: #3498db;
+      /* Biru untuk kursi terpilih */
+      border-color: #2980b9;
+      color: #fff;
     }
 
     .seat.booked {
-      background-color: #666;
-      border-color: #666;
-      color: #999;
+      background-color: #e74c3c;
+      /* Merah untuk kursi sudah dipesan */
+      border-color: #c0392b;
+      color: #fff;
       cursor: not-allowed;
-    }
-
-    .seat.booked:hover {
-      background-color: #666;
-      border-color: #666;
-      color: #999;
     }
 
     .legend {
@@ -214,18 +218,18 @@ require_once __DIR__ . '/../../../functions.php';
     }
 
     .legend-seat.available {
-      border: 2px solid #666;
-      background-color: #333;
+      background-color: #2ecc71;
+      border: 2px solid #27ae60;
     }
 
     .legend-seat.selected {
-      background-color: #ffcc00;
-      border: 2px solid #ffcc00;
+      background-color: #3498db;
+      border: 2px solid #2980b9;
     }
 
     .legend-seat.booked {
-      background-color: #666;
-      border: 2px solid #666;
+      background-color: #e74c3c;
+      border: 2px solid #c0392b;
     }
 
     .booking-summary {
@@ -234,6 +238,9 @@ require_once __DIR__ . '/../../../functions.php';
       border-radius: 12px;
       margin-top: 30px;
       border: 1px solid rgba(255, 255, 255, 0.1);
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     .summary-title {
@@ -371,7 +378,7 @@ require_once __DIR__ . '/../../../functions.php';
   </header>
 
   <main class="seat-selection">
-    <?php if (isset($film) && !empty($film)): ?>
+    <?php if (isset($film) && !empty($film) && isset($jadwal) && !empty($jadwal)): ?>
       <div class="film-info">
         <h1 class="film-title"><?= htmlspecialchars($film['judul'] ?? 'Judul tidak tersedia'); ?></h1>
         <p class="schedule-info">
@@ -381,38 +388,9 @@ require_once __DIR__ . '/../../../functions.php';
           (<?= htmlspecialchars($jadwal['tipe'] ?? 'N/A'); ?>)
         </p>
       </div>
-    <?php else: ?>
-      <div class="film-info">
-        <h1 class="film-title">Film tidak ditemukan</h1>
-        <p class="schedule-info">Silakan kembali ke halaman utama</p>
-      </div>
-    <?php endif; ?>
 
-    <?php if (empty($jadwal ?? [])): ?>
-      <div style="text-align: center; color: #ccc; margin: 50px 0;">
-        <p>Maaf, jadwal tayang untuk film ini belum tersedia.</p>
-        <a href="index.php" style="color: #ffcc00; text-decoration: none;">Kembali ke Home</a>
-      </div>
-    <?php else: ?>
       <form id="bookingForm" action="index.php?controller=booking&action=selectPaymentMethod" method="POST">
-        <!-- Schedule Selection -->
-        <div style="margin-bottom: 30px; text-align: center;">
-          <label for="jadwal_select" style="color: #fff; font-size: 18px; margin-right: 10px;">Pilih Jadwal:</label>
-          <select id="jadwal_select" name="jadwal_id"
-            style="padding: 8px 12px; border-radius: 6px; border: 1px solid #666; background: #333; color: #fff;"
-            onchange="loadSeats()">
-            <option value="">-- Pilih Jadwal --</option>
-            <?php foreach ($jadwal as $j): ?>
-              <option value="<?= $j['jadwal_id']; ?>" data-harga="<?= $j['harga_tiket']; ?>"
-                data-film="<?= htmlspecialchars($j['judul'] ?? ''); ?>" data-tanggal="<?= $j['tanggal']; ?>"
-                data-jam="<?= $j['jam_mulai']; ?>" data-studio="<?= htmlspecialchars($j['nama_studio'] ?? ''); ?>"
-                data-tipe="<?= htmlspecialchars($j['tipe'] ?? ''); ?>">
-                <?= date('d/m/Y', strtotime($j['tanggal'])); ?> - <?= $j['jam_mulai']; ?> - Studio <?= $j['nama_studio']; ?>
-                (<?= $j['tipe']; ?>) - Rp <?= number_format($j['harga_tiket'], 0, ',', '.'); ?>
-              </option>
-            <?php endforeach; ?>
-          </select>
-        </div>
+        <input type="hidden" name="jadwal_id" value="<?= $jadwal['jadwal_id'] ?? '' ?>">
 
         <!-- Screen -->
         <div class="screen">LAYAR</div>
@@ -451,38 +429,28 @@ require_once __DIR__ . '/../../../functions.php';
           <button type="submit" class="btn-book" id="btnBook" disabled>Booking Sekarang</button>
         </div>
       </form>
+    <?php else: ?>
+      <div style="text-align: center; color: #ccc; margin: 50px 0;">
+        <p>Maaf, data film atau jadwal tidak tersedia.</p>
+        <a href="index.php" style="color: #ffcc00; text-decoration: none;">Kembali ke Home</a>
+      </div>
     <?php endif; ?>
   </main>
 
   <script>
     let selectedSeats = [];
-    let seatPrice = 0;
+    let seatPrice = <?= $jadwal['harga_tiket'] ?? 0 ?>;
+
+    // Load seats when page loads
+    document.addEventListener('DOMContentLoaded', function () {
+      loadSeats();
+    });
 
     function loadSeats() {
-      const jadwalSelect = document.getElementById('jadwal_select');
-      const jadwalId = jadwalSelect.value;
-      const selectedOption = jadwalSelect.options[jadwalSelect.selectedIndex];
-      seatPrice = selectedOption ? parseInt(selectedOption.getAttribute('data-harga')) || 0 : 0;
-
-      // Update film info if jadwal is selected
-      if (jadwalId && selectedOption) {
-        const filmTitle = selectedOption.getAttribute('data-film');
-        const tanggal = selectedOption.getAttribute('data-tanggal');
-        const jam = selectedOption.getAttribute('data-jam');
-        const studio = selectedOption.getAttribute('data-studio');
-        const tipe = selectedOption.getAttribute('data-tipe');
-
-        // Update film info display
-        document.querySelector('.film-title').textContent = filmTitle || 'Film tidak tersedia';
-        document.querySelector('.schedule-info').innerHTML = `
-          Jadwal: ${new Date(tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} |
-          Jam: ${jam} |
-          Studio: ${studio} (${tipe})
-        `;
-      }
+      const jadwalId = document.querySelector('input[name="jadwal_id"]').value;
 
       if (!jadwalId) {
-        document.getElementById('seatsContainer').innerHTML = '';
+        document.getElementById('seatsContainer').innerHTML = '<p style="color: #ccc; text-align: center;">Jadwal tidak valid</p>';
         return;
       }
 
@@ -494,13 +462,9 @@ require_once __DIR__ . '/../../../functions.php';
         })
         .catch(error => {
           console.error('Error loading seats:', error);
-          // Fallback to demo layout
+          // Fallback to demo layout if API fails
           renderDemoSeats();
         });
-
-      // Reset selection when changing schedule
-      selectedSeats = [];
-      updateSummary();
     }
 
     function renderSeats(availableSeats, bookedSeats) {
@@ -562,10 +526,14 @@ require_once __DIR__ . '/../../../functions.php';
         // Create 10 seats per row
         for (let i = 1; i <= 10; i++) {
           const seatDiv = document.createElement('div');
-          seatDiv.className = 'seat available';
+          // Randomly mark some seats as booked for demo
+          const isBooked = Math.random() > 0.7;
+          seatDiv.className = `seat ${isBooked ? 'booked' : 'available'}`;
           seatDiv.textContent = row + i;
           seatDiv.dataset.seatId = row + i;
-          seatDiv.onclick = () => toggleSeat(seatDiv);
+          if (!isBooked) {
+            seatDiv.onclick = () => toggleSeat(seatDiv);
+          }
           rowDiv.appendChild(seatDiv);
         }
 

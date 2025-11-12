@@ -77,13 +77,13 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="index.php?controller=admin&action=pesananTiket" class="nav-link">
+          <a href="index.php?controller=admin&action=bookings" class="nav-link">
             🎫 Booking
           </a>
         </li>
         <li class="nav-item">
-          <a href="index.php?controller=admin&action=pembayaran" class="nav-link">
-            💳 Pembayaran
+          <a href="index.php?controller=admin&action=payments" class="nav-link">
+            💳 Payments
           </a>
         </li>
         <li class="nav-item">

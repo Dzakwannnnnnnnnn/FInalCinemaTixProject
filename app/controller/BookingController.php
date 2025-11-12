@@ -146,10 +146,10 @@ class BookingController
       return;
     }
 
-    $payment_method_id = $_POST['payment_method_id'] ?? null;
+    $payment_method = $_POST['payment_method'] ?? null;
     $temp_booking = $_SESSION['temp_booking'] ?? null;
 
-    if (!$payment_method_id || !$temp_booking) {
+    if (!$payment_method || !$temp_booking) {
       echo "Data pembayaran tidak lengkap.";
       return;
     }
@@ -157,10 +157,30 @@ class BookingController
     $bookingModel = new BookingModel();
     $paymentModel = new PaymentModel();
     $jadwalModel = new JadwalModel();
+    $filmModel = new FilmModel();
 
     $user_id = $_SESSION['user_id'];
     $jadwal_id = $temp_booking['jadwal_id'];
     $kursi_ids = $temp_booking['kursi_ids'];
+
+    // Get jadwal and film info for display
+    $jadwal = $jadwalModel->getJadwalById($jadwal_id);
+    $film = $filmModel->getFilmById($jadwal['film_id']);
+
+    // Calculate total price based on payment method
+    $base_price = $jadwal['harga_tiket'] * count($kursi_ids);
+    $admin_fee = 0;
+
+    switch ($payment_method) {
+      case 'e_wallet':
+        $admin_fee = 2500;
+        break;
+      case 'credit_card':
+        $admin_fee = 5000;
+        break;
+    }
+
+    $total_harga = $base_price + $admin_fee;
 
     // Create bookings for multiple seats
     $booking_ids = $bookingModel->createBookingMultipleSeats($user_id, $jadwal_id, $kursi_ids);
@@ -170,14 +190,10 @@ class BookingController
       return;
     }
 
-    // Get total price
-    $jadwal = $jadwalModel->getJadwalById($jadwal_id);
-    $total_price = $jadwal['harga_tiket'] * count($kursi_ids);
-
     // Create payment record for each booking
     $payment_success = true;
     foreach ($booking_ids as $booking_id) {
-      $result = $paymentModel->createPayment($booking_id, $payment_method_id, $jadwal['harga_tiket'], 'sukses');
+      $result = $paymentModel->createPayment($booking_id, $payment_method, $jadwal['harga_tiket'], 'sukses');
       if (!$result) {
         $payment_success = false;
         break;
@@ -191,8 +207,8 @@ class BookingController
       // Generate e-ticket
       $this->generateETicket($booking_ids[0]); // Use first booking ID for e-ticket
 
-      // Redirect to e-ticket page
-      header('Location: index.php?controller=booking&action=eTicket&booking_id=' . $booking_ids[0]);
+      // Show processing page
+      require_once __DIR__ . '/../view/users/process_payment.php';
       exit;
     } else {
       echo "Gagal memproses pembayaran.";
@@ -227,6 +243,36 @@ class BookingController
     if (!$booking) {
       echo "Booking tidak ditemukan.";
       return;
+    }
+
+    // Calculate total payment including admin fee
+    $paymentModel = new PaymentModel();
+    $allPayments = $paymentModel->getAllPayments();
+
+    // Find all payments for this booking (there might be multiple seats)
+    $relatedPayments = array_filter($allPayments, function ($p) use ($booking_id) {
+      return $p['booking_id'] == $booking_id;
+    });
+
+    $payment = reset($relatedPayments);
+    $admin_fee = 0;
+    $total_ticket_price = 0;
+
+    if ($payment && isset($payment['nama_method'])) {
+      // Calculate admin fee based on payment method
+      switch ($payment['nama_method']) {
+        case 'e_wallet':
+          $admin_fee = 2500;
+          break;
+        case 'credit_card':
+          $admin_fee = 5000;
+          break;
+      }
+
+      // Sum up all ticket prices for this booking session
+      foreach ($relatedPayments as $p) {
+        $total_ticket_price += $p['jumlah_bayar'];
+      }
     }
 
     // Generate barcode

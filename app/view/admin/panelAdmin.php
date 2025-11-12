@@ -67,7 +67,7 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="index.php?controller=admin&action=sedangTayang" class="nav-link">
+          <a href="index.php?controller=admin&action=films" class="nav-link">
             🎞️ Film
           </a>
         </li>

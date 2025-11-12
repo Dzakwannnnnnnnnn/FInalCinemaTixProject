@@ -14,11 +14,10 @@ class PaymentModel
   // Get all payments
   public function getAllPayments()
   {
-    $query = "SELECT p.*, b.booking_id, pm.nama_method, u.`nama` as nama_user
+    $query = "SELECT p.*, b.booking_id, p.metode_bayar as nama_method, u.`nama` as nama_user
               FROM pembayaran p
               JOIN booking b ON p.booking_id = b.booking_id
-              JOIN payment_method pm ON p.payment_method_id = pm.payment_method_id
-              JOIN user u ON b.user_id = u.user_id
+              JOIN users u ON b.user_id = u.user_id
               ORDER BY p.pembayaran_id DESC";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute();
@@ -28,11 +27,10 @@ class PaymentModel
   // Get payment by ID
   public function getPaymentById($id)
   {
-    $query = "SELECT p.*, b.booking_id, pm.nama_method, u.`nama` as nama_user, f.judul, j.tanggal, j.jam_mulai, s.nama_studio
+    $query = "SELECT p.*, b.booking_id, p.metode_bayar as nama_method, u.`nama` as nama_user, f.judul, j.tanggal, j.jam_mulai, s.nama_studio
               FROM pembayaran p
               JOIN booking b ON p.booking_id = b.booking_id
-              JOIN payment_method pm ON p.payment_method_id = pm.payment_method_id
-              JOIN user u ON b.user_id = u.user_id
+              JOIN users u ON b.user_id = u.user_id
               JOIN jadwal j ON b.jadwal_id = j.jadwal_id
               JOIN film f ON j.film_id = f.film_id
               JOIN studio s ON j.studio_id = s.studio_id
@@ -63,8 +61,7 @@ class PaymentModel
   // Get payments by booking ID
   public function getPaymentsByBookingId($booking_id)
   {
-    $query = "SELECT p.*, pm.nama_method FROM pembayaran p
-              JOIN payment_method pm ON p.payment_method_id = pm.payment_method_id
+    $query = "SELECT p.*, p.metode_bayar as nama_method FROM pembayaran p
               WHERE p.booking_id = ? ORDER BY p.tanggal_pembayaran DESC";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute([$booking_id]);
@@ -72,11 +69,11 @@ class PaymentModel
   }
 
   // Create payment
-  public function createPayment($booking_id, $payment_method_id, $jumlah, $status = 'pending')
+  public function createPayment($booking_id, $metode_bayar, $jumlah_bayar, $status = 'pending')
   {
-    $query = "INSERT INTO pembayaran (booking_id, payment_method_id, jumlah, status) VALUES (?, ?, ?, ?)";
+    $query = "INSERT INTO pembayaran (booking_id, metode_bayar, jumlah_bayar, status) VALUES (?, ?, ?, ?)";
     $stmt = $this->db->getConnection()->prepare($query);
-    return $stmt->execute([$booking_id, $payment_method_id, $jumlah, $status]);
+    return $stmt->execute([$booking_id, $metode_bayar, $jumlah_bayar, $status]);
   }
 
   // Update payment status

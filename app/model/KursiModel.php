@@ -68,6 +68,15 @@ class KursiModel
     return $stmt->execute([$id]);
   }
 
+  // Get seat by ID
+  public function getKursiById($id)
+  {
+    $query = "SELECT * FROM kursi WHERE kursi_id = ?";
+    $stmt = $this->db->getConnection()->prepare($query);
+    $stmt->execute([$id]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
   // Generate seats for a studio based on capacity
   public function generateSeatsForStudio($studio_id)
   {

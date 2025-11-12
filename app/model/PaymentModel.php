@@ -107,4 +107,12 @@ class PaymentModel
     $stmt = $this->db->getConnection()->prepare($query);
     return $stmt->execute([$id]);
   }
+
+  // Delete payment
+  public function deletePayment($id)
+  {
+    $query = "DELETE FROM pembayaran WHERE pembayaran_id = ?";
+    $stmt = $this->db->getConnection()->prepare($query);
+    return $stmt->execute([$id]);
+  }
 }

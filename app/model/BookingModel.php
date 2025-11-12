@@ -29,7 +29,7 @@ class BookingModel
               JOIN film f ON j.film_id = f.film_id
               JOIN studio s ON j.studio_id = s.studio_id
               JOIN kursi k ON b.kursi_id = k.kursi_id
-              JOIN user u ON b.user_id = u.user_id
+              JOIN users u ON b.user_id = u.user_id
               WHERE b.booking_id = ?";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute([$id]);

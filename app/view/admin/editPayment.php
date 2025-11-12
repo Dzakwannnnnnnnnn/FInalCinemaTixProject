@@ -5,7 +5,7 @@ require_once __DIR__ . '/../layout/header.php';
   <h1 class="h2">Edit Payment Status</h1>
   <div class="btn-toolbar mb-2 mb-md-0">
     <div class="btn-group me-2">
-      <a href="index.php?controller=admin&action=viewPayment&id=<?= $payment['pembayaran_id'] ?>"
+      <a href="index.php?controller=admin&action=viewPayment&id=<?= $payment['pembayaran_id'] ?? '' ?>"
         class="btn btn-sm btn-outline-secondary">Back to View</a>
     </div>
   </div>
@@ -29,31 +29,31 @@ require_once __DIR__ . '/../layout/header.php';
         <div class="row">
           <div class="col-md-6">
             <h6>Payment Information</h6>
-            <p><strong>Payment ID:</strong> <?= $payment['pembayaran_id'] ?></p>
-            <p><strong>Booking ID:</strong> <?= $payment['booking_id'] ?></p>
+            <p><strong>Payment ID:</strong> <?= $payment['pembayaran_id'] ?? 'N/A' ?></p>
+            <p><strong>Booking ID:</strong> <?= $payment['booking_id'] ?? 'N/A' ?></p>
             <p><strong>Current Status:</strong>
               <span
-                class="badge bg-<?= $payment['status'] == 'completed' ? 'success' : ($payment['status'] == 'failed' ? 'danger' : 'warning') ?>">
-                <?= ucfirst($payment['status']) ?>
+                class="badge bg-<?= ($payment['status'] ?? '') == 'completed' ? 'success' : (($payment['status'] ?? '') == 'failed' ? 'danger' : 'warning') ?>">
+                <?= ucfirst($payment['status'] ?? 'unknown') ?>
               </span>
             </p>
-            <p><strong>Payment Date:</strong> <?= htmlspecialchars($payment['tanggal_pembayaran']) ?></p>
+            <p><strong>Payment Date:</strong> <?= !empty($payment['tanggal_pembayaran']) ? htmlspecialchars($payment['tanggal_pembayaran']) : 'Not set' ?></p>
           </div>
           <div class="col-md-6">
             <h6>Payment Details</h6>
-            <p><strong>Payment Method:</strong> <?= htmlspecialchars($payment['nama_method']) ?></p>
-            <p><strong>Amount:</strong> Rp <?= number_format($payment['jumlah'], 0, ',', '.') ?></p>
-            <p><strong>User:</strong> <?= htmlspecialchars($payment['nama_user']) ?></p>
+            <p><strong>Payment Method:</strong> <?= htmlspecialchars($payment['nama_method'] ?? 'N/A') ?></p>
+            <p><strong>Amount:</strong> Rp <?= isset($payment['jumlah']) && $payment['jumlah'] !== null ? number_format((float)$payment['jumlah'], 0, ',', '.') : '0' ?></p>
+            <p><strong>User:</strong> <?= htmlspecialchars($payment['nama_user'] ?? 'N/A') ?></p>
           </div>
         </div>
         <hr>
         <div class="row">
           <div class="col-md-12">
             <h6>Film & Schedule Information</h6>
-            <p><strong>Film:</strong> <?= htmlspecialchars($payment['judul']) ?></p>
+            <p><strong>Film:</strong> <?= htmlspecialchars($payment['judul'] ?? 'N/A') ?></p>
             <p><strong>Date & Time:</strong>
-              <?= htmlspecialchars($payment['tanggal'] . ' ' . $payment['jam_mulai']) ?></p>
-            <p><strong>Studio:</strong> <?= htmlspecialchars($payment['nama_studio']) ?></p>
+              <?= htmlspecialchars(($payment['tanggal'] ?? 'N/A') . ' ' . ($payment['jam_mulai'] ?? '')) ?></p>
+            <p><strong>Studio:</strong> <?= htmlspecialchars($payment['nama_studio'] ?? 'N/A') ?></p>
           </div>
         </div>
       </div>
@@ -69,9 +69,9 @@ require_once __DIR__ . '/../layout/header.php';
           <div class="mb-3">
             <label for="status" class="form-label">Status</label>
             <select class="form-select" id="status" name="status" required>
-              <option value="pending" <?= $payment['status'] == 'pending' ? 'selected' : '' ?>>Pending</option>
-              <option value="completed" <?= $payment['status'] == 'completed' ? 'selected' : '' ?>>Completed</option>
-              <option value="failed" <?= $payment['status'] == 'failed' ? 'selected' : '' ?>>Failed</option>
+              <option value="pending" <?= ($payment['status'] ?? '') == 'pending' ? 'selected' : '' ?>>Pending</option>
+              <option value="completed" <?= ($payment['status'] ?? '') == 'completed' ? 'selected' : '' ?>>Completed</option>
+              <option value="failed" <?= ($payment['status'] ?? '') == 'failed' ? 'selected' : '' ?>>Failed</option>
             </select>
           </div>
           <button type="submit" class="btn btn-primary w-100">Update Status</button>

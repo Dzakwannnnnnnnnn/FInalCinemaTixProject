@@ -570,32 +570,57 @@ class AdminController
     require_once __DIR__ . '/../view/admin/viewPayment.php';
   }
 
-  public function editPayment()
-  {
+public function editPayment()
+{
     $id = $_GET['id'] ?? 0;
     $payment = $this->paymentModel->getPaymentById($id);
 
     if (!$payment) {
-      setFlashMessage('error', 'Payment tidak ditemukan');
-      header('Location: index.php?controller=admin&action=payments');
-      exit;
+        setFlashMessage('error', 'Payment tidak ditemukan');
+        header('Location: index.php?controller=admin&action=payments');
+        exit;
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-      $status = sanitize($_POST['status'] ?? '');
-
-      if ($this->paymentModel->updatePaymentStatus($id, $status)) {
-        setFlashMessage('success', 'Status payment berhasil diupdate');
-        header('Location: index.php?controller=admin&action=payments');
+        $status = $_POST['status'] ?? '';
+        
+        // Validate and sanitize status
+        $allowedStatuses = ['pending', 'completed', 'failed', 'canceled'];
+        if (!in_array($status, $allowedStatuses)) {
+            $_SESSION['flash_message'] = [
+                'type' => 'danger',
+                'message' => 'Invalid status value'
+            ];
+            header('Location: index.php?controller=admin&action=payments');
+            exit;
+        }
+        
+        // Debug: log the update attempt
+        error_log("Attempting to update payment $id to status: $status");
+        
+        if ($this->paymentModel->updatePaymentStatus($id, $status)) {
+            $_SESSION['flash_message'] = [
+                'type' => 'success',
+                'message' => 'Payment status updated successfully'
+            ];
+            
+            // Refresh the payment data after update
+            $payment = $this->paymentModel->getPaymentById($id);
+            error_log("Payment $id updated successfully to: " . $payment['status']);
+        } else {
+            $_SESSION['flash_message'] = [
+                'type' => 'danger',
+                'message' => 'Failed to update payment status'
+            ];
+            error_log("Failed to update payment $id");
+        }
+        
+        header('Location: index.php?controller=admin&action=viewPayment&id=' . $id);
         exit;
-      } else {
-        setFlashMessage('error', 'Gagal mengupdate status payment');
-      }
     }
 
     require_once __DIR__ . '/../view/admin/editPayment.php';
-  }
-
+}
   public function deletePayment()
   {
     $id = $_GET['id'] ?? 0;

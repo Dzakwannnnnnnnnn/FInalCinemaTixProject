@@ -68,21 +68,86 @@ class PaymentModel
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  // Get allowed status values from database schema
+  public function getAllowedStatusValues()
+  {
+    try {
+      $query = "SELECT COLUMN_TYPE 
+                FROM INFORMATION_SCHEMA.COLUMNS 
+                WHERE TABLE_NAME = 'pembayaran' 
+                AND COLUMN_NAME = 'status' 
+                AND TABLE_SCHEMA = DATABASE()";
+      $stmt = $this->db->getConnection()->prepare($query);
+      $stmt->execute();
+      $result = $stmt->fetch(PDO::FETCH_ASSOC);
+      
+      if ($result && isset($result['COLUMN_TYPE'])) {
+        // Parse ENUM values if it's an ENUM column
+        if (preg_match("/^enum\((.*)\)$/", $result['COLUMN_TYPE'], $matches)) {
+          $enum_values = str_getcsv($matches[1], ",", "'");
+          return array_map('trim', $enum_values);
+        }
+      }
+      
+      // Default allowed values if we can't determine from schema
+      return ['pending', 'completed', 'failed', 'canceled'];
+    } catch (Exception $e) {
+      // Fallback to default values
+      return ['pending', 'completed', 'failed', 'canceled'];
+    }
+  }
+
+  // Validate status value
+  private function validateStatus($status)
+  {
+    $allowedStatuses = $this->getAllowedStatusValues();
+    $status = strtolower(trim($status));
+    
+    // If status is not in allowed values, use the first allowed value as default
+    if (!in_array($status, $allowedStatuses)) {
+      error_log("Invalid status value: '$status'. Allowed values: " . implode(', ', $allowedStatuses));
+      return $allowedStatuses[0]; // Return first allowed status as default
+    }
+    
+    return $status;
+  }
+
   // Create payment
   public function createPayment($booking_id, $metode_bayar, $jumlah_bayar, $status = 'pending')
   {
+    $validatedStatus = $this->validateStatus($status);
+    
     $query = "INSERT INTO pembayaran (booking_id, metode_bayar, jumlah_bayar, status) VALUES (?, ?, ?, ?)";
     $stmt = $this->db->getConnection()->prepare($query);
-    return $stmt->execute([$booking_id, $metode_bayar, $jumlah_bayar, $status]);
+    return $stmt->execute([$booking_id, $metode_bayar, $jumlah_bayar, $validatedStatus]);
   }
 
   // Update payment status
-  public function updatePaymentStatus($id, $status)
-  {
+ // Update payment status
+// Update payment status
+public function updatePaymentStatus($id, $status)
+{
+    $validatedStatus = $this->validateStatus($status);
+    
     $query = "UPDATE pembayaran SET status = ? WHERE pembayaran_id = ?";
     $stmt = $this->db->getConnection()->prepare($query);
-    return $stmt->execute([$status, $id]);
-  }
+    
+    try {
+        $result = $stmt->execute([$validatedStatus, $id]);
+        
+        // Check if any row was affected
+        if ($result && $stmt->rowCount() > 0) {
+            error_log("Payment $id status updated to: $validatedStatus - Rows affected: " . $stmt->rowCount());
+            return true;
+        } else {
+            error_log("No rows affected when updating payment $id");
+            return false;
+        }
+    } catch (PDOException $e) {
+        error_log("Error updating payment status: " . $e->getMessage());
+        return false;
+    }
+}
 
   // Add payment method
   public function addPaymentMethod($nama_method, $tipe, $status = 'aktif')

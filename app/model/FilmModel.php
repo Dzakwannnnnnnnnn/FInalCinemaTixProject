@@ -53,10 +53,10 @@ class FilmModel
     return $stmt->execute([$id]);
   }
 
-  // Get films that are currently playing (now playing) - limit to 3-4 latest films
+  // Get films that are currently playing (now playing) - limit to 3 latest films
   public function getNowPlaying()
   {
-    $query = "SELECT * FROM film ORDER BY film_id DESC LIMIT 4";
+    $query = "SELECT * FROM film ORDER BY film_id DESC LIMIT 3";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);

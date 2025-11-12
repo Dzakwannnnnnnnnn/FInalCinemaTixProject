@@ -1,10 +1,14 @@
+<?php
+require_once __DIR__ . '/../../../functions.php';
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cinematix | Login</title>
+  <title><?php echo htmlspecialchars($news['judul_news'] ?? 'Detail Berita'); ?> - CinemaTix</title>
   <link rel="icon" type="image/png" href="tix_logo.png">
   <style>
     * {
@@ -17,8 +21,6 @@
     body {
       background-color: #000;
       color: #fff;
-      display: flex;
-      flex-direction: column;
       min-height: 100vh;
     }
 
@@ -157,150 +159,110 @@
       cursor: pointer;
     }
 
-    /* Login Section */
-    .login-section {
-      flex: 1;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 120px 20px 60px;
+    /* Main Content */
+    .main-content {
+      padding: 120px 80px 60px;
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .login-box {
-      background-color: #111;
-      padding: 40px 50px;
+    .news-detail {
+      background: #111;
       border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255, 204, 0, 0.2);
+      overflow: hidden;
+      box-shadow: 0 8px 32px rgba(255, 204, 0, 0.1);
+    }
+
+    .news-image {
       width: 100%;
-      max-width: 400px;
-      text-align: center;
+      height: 400px;
+      object-fit: cover;
     }
 
-    .login-box h2 {
-      color: #ffcc00;
-      margin-bottom: 25px;
+    .news-content {
+      padding: 40px;
     }
 
-    .input-group {
-      margin-bottom: 20px;
-      text-align: left;
-    }
-
-    .input-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: #ddd;
-    }
-
-    .input-group input {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      background-color: #000;
-      color: #fff;
-      outline: none;
-      transition: 0.3s;
-    }
-
-    .input-group input:focus {
-      border-color: #ffcc00;
-    }
-
-    .btn-submit {
-      background-color: #ffcc00;
-      color: #000;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
+    .news-title {
+      font-size: 32px;
       font-weight: bold;
-      cursor: pointer;
-      width: 100%;
-      transition: 0.3s;
-    }
-
-    .btn-submit:hover {
-      background-color: #ffd633;
-    }
-
-    .login-footer {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    .login-footer a {
       color: #ffcc00;
-      text-decoration: none;
-    }
-
-    .login-footer a:hover {
-      text-decoration: underline;
-    }
-
-    /* Google Button */
-    .btn-google {
-      margin-top: 15px;
-      width: 100%;
-      background-color: #222;
-      border: 1px solid #333;
-      color: #fff;
-      padding: 10px;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-
-    .btn-google:hover {
-      background-color: #333;
-      border-color: #ffcc00;
-      color: #ffcc00;
-    }
-
-    .forgot-password {
-      text-align: right;
-      margin-bottom: 15px;
-    }
-
-    .forgot-password a {
-      font-size: 13px;
-      color: #ccc;
-      text-decoration: none;
-    }
-
-    .forgot-password a:hover {
-      color: #ffcc00;
-    }
-
-    .register-footer {
-      margin-top: 15px;
-      font-size: 14px;
-      color: #ccc;
-    }
-
-    .register-footer a {
-      color: #ffcc00;
-      text-decoration: none;
-    }
-
-    /* Alert Messages */
-    .alert {
-      padding: 10px;
       margin-bottom: 20px;
-      border-radius: 5px;
-      text-align: center;
+      line-height: 1.2;
     }
 
-    .alert-error {
-      background-color: #ff4444;
-      color: white;
+    .news-meta {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      color: #ccc;
+      font-size: 14px;
     }
 
-    .alert-success {
-      background-color: #44ff44;
-      color: black;
+    .news-description {
+      font-size: 18px;
+      line-height: 1.8;
+      color: #fff;
+      margin-bottom: 40px;
+    }
+
+    .back-button {
+      display: inline-block;
+      background: #ffcc00;
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+
+    .back-button:hover {
+      background: #ffd633;
+      transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 15px 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .nav-links.active {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: #111;
+        padding: 20px;
+        gap: 15px;
+      }
+
+      .main-content {
+        padding: 120px 20px 60px;
+      }
+
+      .news-content {
+        padding: 20px;
+      }
+
+      .news-title {
+        font-size: 24px;
+      }
+
+      .news-description {
+        font-size: 16px;
+      }
     }
   </style>
 </head>
@@ -308,7 +270,7 @@
 <body>
   <!-- Navbar -->
   <header class="navbar">
-    <div class="logo" onclick="window.location.href='index.php'" style="cursor:pointer;">Cinematix</div>
+    <div class="logo" onclick="window.location.href='index.php'">Cinematix</div>
     <div class="menu-toggle" id="menu-toggle">☰</div>
 
     <nav>
@@ -328,39 +290,61 @@
     <a href="index.php?controller=auth&action=login" class="btn-login">Masuk / Daftar</a>
   </header>
 
-  <!-- Login Section -->
-  <section class="login-section">
-    <div class="login-box">
-      <h2>Masuk ke Akun</h2>
-
-      <?php if (isset($flash) && $flash): ?>
-        <div class="alert alert-<?= $flash['type'] ?>">
-          <?= htmlspecialchars($flash['message']) ?>
-        </div>
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="news-detail">
+      <?php if (!empty($news['foto_news'])): ?>
+        <img src="public/uploads/<?php echo htmlspecialchars($news['foto_news']); ?>"
+          alt="<?php echo htmlspecialchars($news['judul_news']); ?>" class="news-image">
       <?php endif; ?>
 
-      <form action="index.php?controller=auth&action=doLogin" method="POST">
-        <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" name="email" placeholder="Masukkan email" required>
+      <div class="news-content">
+        <h1 class="news-title"><?php echo htmlspecialchars($news['judul_news']); ?></h1>
+
+        <div class="news-meta">
+          <span>📅 <?php echo date('d M Y', strtotime($news['created_at'] ?? 'now')); ?></span>
+          <span>📰 Berita CinemaTix</span>
         </div>
 
-        <div class="input-group">
-          <label for="password">Kata Sandi</label>
-          <input type="password" id="password" name="password" placeholder="Masukkan kata sandi" required>
+        <div class="news-description">
+          <?php echo nl2br(htmlspecialchars($news['deskripsi_news'])); ?>
         </div>
 
-        <div class="forgot-password">
-          <a href="#">Lupa kata sandi?</a>
-        </div>
-
-        <button type="submit" class="btn-submit">Masuk</button><br><br>
-        <div class="register-footer">
-          <p>Belum punya akun? <a href="index.php?controller=auth&action=register">Daftar di sini</a></p>
-        </div>
-      </form>
+        <a href="index.php?controller=user&action=beritaEvent" class="back-button">← Kembali ke Berita</a>
+      </div>
     </div>
-  </section>
+  </main>
+
+  <script>
+    // Navbar toggle
+    const menuToggle = document.getElementById("menu-toggle");
+    const navLinks = document.getElementById("nav-links");
+
+    menuToggle.addEventListener("click", () => {
+      navLinks.classList.toggle("active");
+    });
+
+    // Tutup menu mobile saat klik link
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        navLinks.classList.remove('active');
+      });
+    });
+
+    // Smooth scroll untuk anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+          target.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          });
+        }
+      });
+    });
+  </script>
 </body>
 
 </html>

@@ -7,6 +7,8 @@ class FilmController
 {
   public function detail()
   {
+    // Allow access without login - users can view film details but need to login for booking
+
     $id = $_GET['id'] ?? null;
     if (!$id) {
       echo "Film ID tidak ditemukan.";

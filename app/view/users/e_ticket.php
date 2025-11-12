@@ -115,11 +115,26 @@ require_once __DIR__ . '/../../../functions.php';
       line-height: 1.1;
     }
 
+    /* ✅ FIX: bagian print */
     @media print {
+
+      html,
       body {
         background: white !important;
         margin: 0;
-        padding: 20px;
+        padding: 0;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      .ticket-container {
+        margin: 0;
+        padding: 0;
+        height: auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        page-break-inside: avoid;
       }
 
       .e-ticket {
@@ -127,6 +142,7 @@ require_once __DIR__ . '/../../../functions.php';
         box-shadow: none !important;
         margin: 0 auto;
         page-break-inside: avoid;
+        transform: scale(1);
       }
 
       .e-ticket::before,
@@ -161,12 +177,14 @@ require_once __DIR__ . '/../../../functions.php';
         display: none !important;
       }
 
+      /* ✅ Set ukuran dan margin halaman fix */
       @page {
         size: A4;
-        margin: 1cm;
+        margin: 0;
       }
     }
   </style>
+
 </head>
 
 <body>
@@ -260,52 +278,6 @@ require_once __DIR__ . '/../../../functions.php';
       color: #000;
     }
   </style>
-</body>
-
-</html>
-</div>
-</div>
-
-<style>
-  .action-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    margin-top: 30px;
-  }
-
-  .btn-print {
-    background-color: #ffcc00;
-    color: #000;
-    font-weight: bold;
-    padding: 12px 30px;
-    border-radius: 8px;
-    border: none;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.3s;
-  }
-
-  .btn-print:hover {
-    background-color: #ffd633;
-  }
-
-  .btn-back {
-    background-color: transparent;
-    color: #ffcc00;
-    border: 1px solid #ffcc00;
-    padding: 12px 30px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-size: 16px;
-    transition: 0.3s;
-  }
-
-  .btn-back:hover {
-    background-color: #ffcc00;
-    color: #000;
-  }
-</style>
 </body>
 
 </html>

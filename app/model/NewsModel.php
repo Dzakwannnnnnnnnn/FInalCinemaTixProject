@@ -62,4 +62,13 @@ class NewsModel
     $stmt->execute([$searchTerm, $searchTerm]);
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
+
+  // Get latest news with limit
+  public function getLatestNews($limit = 3)
+  {
+    $query = "SELECT * FROM news ORDER BY id_news DESC LIMIT " . (int) $limit;
+    $stmt = $this->db->getConnection()->prepare($query);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
 }

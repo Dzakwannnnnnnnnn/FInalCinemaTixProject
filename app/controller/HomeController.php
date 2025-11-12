@@ -12,7 +12,7 @@ class HomeController
     $films = $filmModel->getNowPlaying();
 
     $newsModel = new NewsModel();
-    $news = $newsModel->getAllNews();
+    $news = $newsModel->getLatestNews(3); // Get only 3 latest news
 
     // arahkan ke halaman utama
     require_once __DIR__ . '/../view/users/index.php';

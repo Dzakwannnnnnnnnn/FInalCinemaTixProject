@@ -63,6 +63,7 @@ class AdminController
       $genre = sanitize($_POST['genre'] ?? '');
       $durasi = (int) ($_POST['durasi'] ?? 0);
       $rating_usia = sanitize($_POST['rating_usia'] ?? '');
+      $rating_bintang = isset($_POST['rating_bintang']) && $_POST['rating_bintang'] !== '' ? (float) $_POST['rating_bintang'] : null;
       $deskripsi = sanitize($_POST['deskripsi'] ?? '');
 
       // Handle file upload
@@ -76,7 +77,7 @@ class AdminController
         }
       }
 
-      if ($this->filmModel->addFilm($judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, null)) {
+      if ($this->filmModel->addFilm($judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating_bintang)) {
         setFlashMessage('success', 'Film berhasil ditambahkan');
         header('Location: index.php?controller=admin&action=films');
         exit;
@@ -104,6 +105,7 @@ class AdminController
       $genre = sanitize($_POST['genre'] ?? '');
       $durasi = (int) ($_POST['durasi'] ?? 0);
       $rating_usia = sanitize($_POST['rating_usia'] ?? '');
+      $rating_bintang = isset($_POST['rating_bintang']) && $_POST['rating_bintang'] !== '' ? (float) $_POST['rating_bintang'] : null;
       $deskripsi = sanitize($_POST['deskripsi'] ?? '');
 
       // Handle file upload
@@ -115,7 +117,7 @@ class AdminController
         }
       }
 
-      if ($this->filmModel->updateFilm($id, $judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, null)) {
+      if ($this->filmModel->updateFilm($id, $judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating_bintang)) {
         setFlashMessage('success', 'Film berhasil diupdate');
         header('Location: index.php?controller=admin&action=films');
         exit;

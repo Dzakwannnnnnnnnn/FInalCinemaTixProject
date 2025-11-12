@@ -30,19 +30,19 @@ class FilmModel
   }
 
   // Add new film
-  public function addFilm($judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating = null)
+  public function addFilm($judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating_bintang = null)
   {
-    $query = "INSERT INTO film (judul, genre, durasi, rating_usia, deskripsi, poster_url) VALUES (?, ?, ?, ?, ?, ?)";
+    $query = "INSERT INTO film (judul, genre, durasi, rating_usia, deskripsi, poster_url, rating_bintang) VALUES (?, ?, ?, ?, ?, ?, ?)";
     $stmt = $this->db->getConnection()->prepare($query);
-    return $stmt->execute([$judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url]);
+    return $stmt->execute([$judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating_bintang]);
   }
 
   // Update film
-  public function updateFilm($id, $judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating = null)
+  public function updateFilm($id, $judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating_bintang = null)
   {
-    $query = "UPDATE film SET judul = ?, genre = ?, durasi = ?, rating_usia = ?, deskripsi = ?, poster_url = ? WHERE film_id = ?";
+    $query = "UPDATE film SET judul = ?, genre = ?, durasi = ?, rating_usia = ?, deskripsi = ?, poster_url = ?, rating_bintang = ? WHERE film_id = ?";
     $stmt = $this->db->getConnection()->prepare($query);
-    return $stmt->execute([$judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $id]);
+    return $stmt->execute([$judul, $genre, $durasi, $rating_usia, $deskripsi, $poster_url, $rating_bintang, $id]);
   }
 
   // Delete film

@@ -279,7 +279,24 @@ require_once __DIR__ . '/../../../functions.php';
         <div class="film-meta">
           <span class="rating-usia"><?= htmlspecialchars($film['rating_usia'] ?? 'N/A'); ?></span>
           <span class="rating-film">
-            <span class="stars">★★★★☆</span> 4.5/5
+            <span class="stars">
+              <?php
+              $rating = $film['rating_bintang'] ?? 0;
+              $fullStars = floor($rating);
+              $halfStar = ($rating - $fullStars) >= 0.5;
+              $emptyStars = 5 - $fullStars - ($halfStar ? 1 : 0);
+
+              echo str_repeat('★', $fullStars);
+              if ($halfStar)
+                echo '☆';
+              echo str_repeat('☆', $emptyStars);
+              ?>
+            </span>
+            <?php if ($rating > 0): ?>
+              <?= number_format($rating, 1); ?>/5
+            <?php else: ?>
+              Belum ada rating
+            <?php endif; ?>
           </span>
         </div>
 

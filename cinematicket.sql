@@ -48,7 +48,8 @@ CREATE TABLE `film` (
   `durasi` int NOT NULL,
   `rating_usia` varchar(20) DEFAULT NULL,
   `deskripsi` text,
-  `poster_url` varchar(255) DEFAULT NULL
+  `poster_url` varchar(255) DEFAULT NULL,
+  `rating_bintang` decimal(3,1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --

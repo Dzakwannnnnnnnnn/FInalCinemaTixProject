@@ -158,6 +158,13 @@
                 </div>
 
                 <div class="mb-3">
+                  <label for="rating_bintang" class="form-label fw-semibold">Rating Bintang (1-5)</label>
+                  <input type="number" class="form-control" id="rating_bintang" name="rating_bintang" min="1" max="5"
+                    step="0.1" placeholder="Contoh: 4.5">
+                  <div class="form-text">Opsional: Masukkan rating bintang dari 1.0 sampai 5.0</div>
+                </div>
+
+                <div class="mb-3">
                   <label for="deskripsi" class="form-label fw-semibold">Deskripsi</label>
                   <textarea class="form-control" id="deskripsi" name="deskripsi" rows="4"></textarea>
                 </div>

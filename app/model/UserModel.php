@@ -56,4 +56,27 @@ class UserModel
     $stmt = $this->db->getConnection()->prepare($query);
     return $stmt->execute([$id]);
   }
+
+  public function storeResetToken($userId, $token, $expiry)
+  {
+    $query = "UPDATE users SET reset_token = ?, reset_expiry = ? WHERE user_id = ?";
+    $stmt = $this->db->getConnection()->prepare($query);
+    return $stmt->execute([$token, $expiry, $userId]);
+  }
+
+  public function getUserByResetToken($token)
+  {
+    $query = "SELECT * FROM users WHERE reset_token = ?";
+    $stmt = $this->db->getConnection()->prepare($query);
+    $stmt->execute([$token]);
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+  }
+
+  public function resetPassword($userId, $newPassword)
+  {
+    $hashedPassword = hashPassword($newPassword);
+    $query = "UPDATE users SET password = ?, reset_token = NULL, reset_expiry = NULL WHERE user_id = ?";
+    $stmt = $this->db->getConnection()->prepare($query);
+    return $stmt->execute([$hashedPassword, $userId]);
+  }
 }

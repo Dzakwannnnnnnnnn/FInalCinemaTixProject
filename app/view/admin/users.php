@@ -33,6 +33,52 @@
       color: #000;
       font-weight: bold;
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100% !important;
+        min-height: auto;
+        position: relative !important;
+      }
+
+      .container-fluid {
+        margin-left: 0 !important;
+      }
+
+      .table-responsive {
+        font-size: 12px;
+      }
+
+      .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+      }
+    }
+
+    @media (max-width: 576px) {
+
+      .table th,
+      .table td {
+        padding: 0.5rem;
+        font-size: 11px;
+      }
+
+      .badge {
+        font-size: 10px;
+      }
+
+      .btn-group-sm .btn {
+        padding: 0.2rem 0.4rem;
+        font-size: 0.7rem;
+      }
+    }
   </style>
 </head>
 

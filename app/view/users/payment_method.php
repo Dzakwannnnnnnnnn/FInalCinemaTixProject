@@ -46,20 +46,94 @@ require_once __DIR__ . '/../../../functions.php';
     .nav-links {
       list-style: none;
       display: flex;
-      gap: 30px;
+      gap: 20px;
       transition: all 0.3s ease;
     }
 
     .nav-links a {
       color: #fff;
       text-decoration: none;
-      font-size: 15px;
-      transition: color 0.3s;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s;
     }
 
     .nav-links a:hover,
     .nav-links a.active {
       color: #ffcc00;
+      background: rgba(255, 204, 0, 0.1);
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown>a::after {
+      content: ' ▼';
+      font-size: 12px;
+      margin-left: 5px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-dropdown:hover>a::after {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #111;
+      border: 1px solid rgba(255, 204, 0, 0.3);
+      border-radius: 8px;
+      min-width: 200px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-content {
+      display: block;
+    }
+
+    .nav-dropdown-content a {
+      display: block;
+      padding: 12px 16px;
+      color: #fff;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .nav-dropdown-content a:hover {
+      background: rgba(255, 204, 0, 0.1);
+      color: #ffcc00;
+      padding-left: 20px;
+    }
+
+    .nav-dropdown-content a:last-child {
+      border-bottom: none;
+    }
+
+    .nav-dropdown-content a::before {
+      content: '▶';
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: #666;
+      transition: all 0.3s;
+      opacity: 0;
+    }
+
+    .nav-dropdown-content a:hover::before {
+      opacity: 1;
+      color: #ffcc00;
+      left: 12px;
     }
 
     .btn-login {
@@ -346,7 +420,8 @@ require_once __DIR__ . '/../../../functions.php';
         <div class="summary-details">
           <p>Film: <?= htmlspecialchars($film['judul'] ?? 'N/A'); ?></p>
           <p>Jadwal: <?= date('l, d F Y', strtotime($jadwal['tanggal'] ?? '')); ?> -
-            <?= date('H:i', strtotime($jadwal['jam_mulai'] ?? '')); ?></p>
+            <?= date('H:i', strtotime($jadwal['jam_mulai'] ?? '')); ?>
+          </p>
           <p>Studio: <?= htmlspecialchars($jadwal['nama_studio'] ?? 'N/A'); ?>
             (<?= htmlspecialchars($jadwal['tipe'] ?? 'N/A'); ?>)</p>
           <p>Kursi: <?= htmlspecialchars(implode(', ', $kursi_ids ?? [])); ?></p>

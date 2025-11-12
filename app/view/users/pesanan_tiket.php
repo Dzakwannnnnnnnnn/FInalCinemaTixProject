@@ -38,6 +38,18 @@
       z-index: 100;
     }
 
+    .navbar-left {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
     .logo {
       font-size: 24px;
       font-weight: bold;
@@ -370,23 +382,22 @@
     }
   </style>
   <script>
-    // Navbar toggle
-    const menuToggle = document.getElementById("menu-toggle");
-    const navLinks = document.getElementById("nav-links");
-
-    menuToggle.addEventListener("click", () => {
-      navLinks.classList.toggle("active");
-    });
-
-    // Tutup menu mobile saat klik link
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        navLinks.classList.remove('active');
-      });
-    });
-
     // Filter functionality for rating section
     document.addEventListener('DOMContentLoaded', function () {
+      // Navbar toggle
+      const menuToggle = document.getElementById("menu-toggle");
+      const navLinks = document.getElementById("nav-links");
+
+      menuToggle.addEventListener("click", () => {
+        navLinks.classList.toggle("active");
+      });
+
+      // Tutup menu mobile saat klik link
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+          navLinks.classList.remove('active');
+        });
+      });
       // Rating filter
       const ratingButtons = document.querySelectorAll('.rating-section .filter-btn');
       const ratingMovies = document.querySelectorAll('#rating-movies .movie-card');
@@ -516,35 +527,41 @@
 
   <!-- HEADER -->
   <header class="navbar">
-    <div class="logo" onclick="window.location.href='index.php'">Cinematix</div>
-    <div class="menu-toggle" id="menu-toggle">☰</div>
+    <div class="navbar-left">
+      <div class="logo" onclick="window.location.href='index.php'">Cinematix</div>
+    </div>
 
-    <nav>
-      <ul class="nav-links" id="nav-links">
-        <li><a href="index.php">Home</a></li>
-        <li class="nav-dropdown">
-          <a href="index.php?controller=user&action=pesanan" class="active">Film & Tiket</a>
-          <div class="nav-dropdown-content">
-            <a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a>
-            <a href="index.php?controller=user&action=purchaseHistory">Riwayat Pembelian</a>
-          </div>
-        </li>
-        <li><a href="index.php#movies">Sedang Tayang</a></li>
-        <li><a href="index.php?controller=user&action=beritaEvent">Berita & Event</a></li>
-      </ul>
-    </nav>
-    <?php if (isLoggedIn()): ?>
-      <div style="display: flex; align-items: center; gap: 15px;">
-        <span style="color: #fff; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
-        <?php if (isAdmin()): ?>
-          <a href="index.php?controller=admin&action=index" class="btn-login"
-            style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>
-        <?php endif; ?>
-        <a href="index.php?controller=auth&action=logout" class="btn-login">Logout</a>
-      </div>
-    <?php else: ?>
-      <a href="index.php?controller=auth&action=login" class="btn-login">Masuk/Daftar</a>
-    <?php endif; ?>
+    <div class="navbar-right">
+      <nav>
+        <ul class="nav-links" id="nav-links">
+          <li><a href="index.php">Home</a></li>
+          <li class="nav-dropdown">
+            <a href="index.php?controller=user&action=pesanan" class="active">Film & Tiket</a>
+            <div class="nav-dropdown-content">
+              <a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a>
+              <a href="index.php?controller=user&action=purchaseHistory">Riwayat Pembelian</a>
+            </div>
+          </li>
+          <li><a href="index.php#movies">Sedang Tayang</a></li>
+          <li><a href="index.php?controller=user&action=beritaEvent">Berita & Event</a></li>
+        </ul>
+      </nav>
+
+      <?php if (isLoggedIn()): ?>
+        <div style="display: flex; align-items: center; gap: 15px;">
+          <span style="color: #fff; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+          <?php if (isAdmin()): ?>
+            <a href="index.php?controller=admin&action=index" class="btn-login"
+              style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>
+          <?php endif; ?>
+          <a href="index.php?controller=auth&action=logout" class="btn-login">Logout</a>
+        </div>
+      <?php else: ?>
+        <a href="index.php?controller=auth&action=login" class="btn-login">Masuk/Daftar</a>
+      <?php endif; ?>
+
+      <div class="menu-toggle" id="menu-toggle">☰</div>
+    </div>
   </header>
 
   <!-- HERO SECTION -->

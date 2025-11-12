@@ -43,6 +43,76 @@
     .table img:hover {
       transform: scale(1.5);
     }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100% !important;
+        min-height: auto;
+        position: relative !important;
+      }
+
+      .container-fluid {
+        margin-left: 0 !important;
+      }
+
+      .row.mb-4 .col-md-3 {
+        margin-bottom: 15px;
+      }
+
+      .stats-cards .card {
+        margin-bottom: 15px;
+      }
+
+      .quick-actions .col-md-3 {
+        margin-bottom: 10px;
+      }
+
+      .recent-section .col-md-6 {
+        margin-bottom: 30px;
+      }
+
+      .table-responsive {
+        font-size: 12px;
+      }
+
+      .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+      }
+
+      .stats-cards .row {
+        flex-direction: column;
+      }
+
+      .stats-cards .col-md-3 {
+        width: 100%;
+      }
+
+      .quick-actions .row .col-md-3 {
+        width: 100%;
+      }
+
+      .recent-section .row .col-md-6 {
+        width: 100%;
+      }
+
+      .card-body .row.g-3 {
+        flex-direction: column;
+      }
+
+      .card-body .col-md-3 {
+        width: 100%;
+      }
+    }
   </style>
 </head>
 

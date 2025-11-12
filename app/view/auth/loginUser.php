@@ -157,6 +157,50 @@
       cursor: pointer;
     }
 
+    /* Responsive */
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 15px 20px;
+      }
+
+      .nav-links {
+        position: absolute;
+        top: 65px;
+        right: 0;
+        background: #111;
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+        gap: 0;
+        overflow: hidden;
+        max-height: 0;
+        transition: max-height 0.4s ease;
+        padding: 0;
+      }
+
+      .nav-links li {
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 14px 0;
+      }
+
+      .nav-links.active {
+        max-height: 300px;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      .login-box {
+        padding: 30px 20px;
+        max-width: 90%;
+      }
+
+      .login-box h2 {
+        font-size: 24px;
+      }
+    }
+
     /* Login Section */
     .login-section {
       flex: 1;
@@ -351,7 +395,7 @@
         </div>
 
         <div class="forgot-password">
-          <a href="#">Lupa kata sandi?</a>
+          <a href="index.php?controller=auth&action=forgotPassword">Lupa kata sandi?</a>
         </div>
 
         <button type="submit" class="btn-submit">Masuk</button><br><br>

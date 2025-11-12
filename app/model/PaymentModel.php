@@ -14,20 +14,29 @@ class PaymentModel
   // Get all payments
   public function getAllPayments()
   {
-    $query = "SELECT p.*, b.booking_id, p.metode_bayar as nama_method, u.`nama` as nama_user
+    $query = "SELECT p.*, b.booking_id, p.metode_bayar as nama_method, u.`nama` as nama_user,
+                     p.jumlah_bayar as jumlah, p.tanggal_bayar as tanggal_pembayaran
               FROM pembayaran p
               JOIN booking b ON p.booking_id = b.booking_id
               JOIN users u ON b.user_id = u.user_id
               ORDER BY p.pembayaran_id DESC";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute();
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $payments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Map status values for consistency
+    foreach ($payments as &$payment) {
+      $payment['status'] = $this->mapStatusFromDb($payment['status']);
+    }
+
+    return $payments;
   }
 
   // Get payment by ID
   public function getPaymentById($id)
   {
-    $query = "SELECT p.*, b.booking_id, p.metode_bayar as nama_method, u.`nama` as nama_user, f.judul, j.tanggal, j.jam_mulai, s.nama_studio
+    $query = "SELECT p.*, b.booking_id, p.metode_bayar as nama_method, u.`nama` as nama_user, f.judul, j.tanggal, j.jam_mulai, s.nama_studio,
+                     p.jumlah_bayar as jumlah, p.tanggal_bayar as tanggal_pembayaran
               FROM pembayaran p
               JOIN booking b ON p.booking_id = b.booking_id
               JOIN users u ON b.user_id = u.user_id
@@ -37,7 +46,14 @@ class PaymentModel
               WHERE p.pembayaran_id = ?";
     $stmt = $this->db->getConnection()->prepare($query);
     $stmt->execute([$id]);
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    $payment = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    // Map status value for consistency
+    if ($payment) {
+      $payment['status'] = $this->mapStatusFromDb($payment['status']);
+    }
+
+    return $payment;
   }
 
   // Get all payment methods
@@ -80,7 +96,7 @@ class PaymentModel
       $stmt = $this->db->getConnection()->prepare($query);
       $stmt->execute();
       $result = $stmt->fetch(PDO::FETCH_ASSOC);
-      
+
       if ($result && isset($result['COLUMN_TYPE'])) {
         // Parse ENUM values if it's an ENUM column
         if (preg_match("/^enum\((.*)\)$/", $result['COLUMN_TYPE'], $matches)) {
@@ -88,7 +104,7 @@ class PaymentModel
           return array_map('trim', $enum_values);
         }
       }
-      
+
       // Default allowed values if we can't determine from schema
       return ['pending', 'completed', 'failed', 'canceled'];
     } catch (Exception $e) {
@@ -102,52 +118,76 @@ class PaymentModel
   {
     $allowedStatuses = $this->getAllowedStatusValues();
     $status = strtolower(trim($status));
-    
+
     // If status is not in allowed values, use the first allowed value as default
     if (!in_array($status, $allowedStatuses)) {
       error_log("Invalid status value: '$status'. Allowed values: " . implode(', ', $allowedStatuses));
       return $allowedStatuses[0]; // Return first allowed status as default
     }
-    
+
     return $status;
+  }
+
+  // Map status from database to display values
+  private function mapStatusFromDb($dbStatus)
+  {
+    $statusMap = [
+      'sukses' => 'completed',
+      'gagal' => 'failed',
+      'pending' => 'pending'
+    ];
+
+    return $statusMap[$dbStatus] ?? $dbStatus;
+  }
+
+  // Map status to database values
+  private function mapStatusToDb($displayStatus)
+  {
+    $statusMap = [
+      'completed' => 'sukses',
+      'failed' => 'gagal',
+      'pending' => 'pending'
+    ];
+
+    return $statusMap[$displayStatus] ?? $displayStatus;
   }
 
   // Create payment
   public function createPayment($booking_id, $metode_bayar, $jumlah_bayar, $status = 'pending')
   {
     $validatedStatus = $this->validateStatus($status);
-    
+
     $query = "INSERT INTO pembayaran (booking_id, metode_bayar, jumlah_bayar, status) VALUES (?, ?, ?, ?)";
     $stmt = $this->db->getConnection()->prepare($query);
     return $stmt->execute([$booking_id, $metode_bayar, $jumlah_bayar, $validatedStatus]);
   }
 
   // Update payment status
- // Update payment status
-// Update payment status
-public function updatePaymentStatus($id, $status)
-{
-    $validatedStatus = $this->validateStatus($status);
-    
+  public function updatePaymentStatus($id, $status)
+  {
+    // Map display status to database status
+    $dbStatus = $this->mapStatusToDb($status);
+    $validatedStatus = $this->validateStatus($dbStatus);
+
     $query = "UPDATE pembayaran SET status = ? WHERE pembayaran_id = ?";
     $stmt = $this->db->getConnection()->prepare($query);
-    
+
     try {
-        $result = $stmt->execute([$validatedStatus, $id]);
-        
-        // Check if any row was affected
-        if ($result && $stmt->rowCount() > 0) {
-            error_log("Payment $id status updated to: $validatedStatus - Rows affected: " . $stmt->rowCount());
-            return true;
-        } else {
-            error_log("No rows affected when updating payment $id");
-            return false;
-        }
-    } catch (PDOException $e) {
-        error_log("Error updating payment status: " . $e->getMessage());
+      $result = $stmt->execute([$validatedStatus, $id]);
+
+      // Check if any row was affected
+      if ($result && $stmt->rowCount() > 0) {
+        error_log("Payment $id status updated to: $validatedStatus - Rows affected: " . $stmt->rowCount());
+        return true;
+      } else {
+        error_log("No rows affected when updating payment $id");
         return false;
+      }
+    } catch (PDOException $e) {
+      error_log("Error updating payment status: " . $e->getMessage());
+      return false;
     }
-}
+  }
 
   // Add payment method
   public function addPaymentMethod($nama_method, $tipe, $status = 'aktif')

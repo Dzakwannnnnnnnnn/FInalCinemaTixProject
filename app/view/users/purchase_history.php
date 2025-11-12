@@ -219,6 +219,51 @@ require_once __DIR__ . '/../../../functions.php';
         margin-bottom: 20px;
         display: inline-flex;
       }
+
+      .history-card {
+        padding: 20px;
+      }
+
+      .film-title {
+        font-size: 1.2em;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 10px;
+      }
+
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .history-card {
+        padding: 15px;
+      }
+
+      .detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+      }
+
+      .price-section {
+        padding: 10px;
+      }
+
+      .btn {
+        padding: 10px 15px;
+        font-size: 13px;
+      }
     }
   </style>
 </head>

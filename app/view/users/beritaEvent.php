@@ -315,6 +315,44 @@ require_once __DIR__ . '/../../../functions.php';
       .menu-toggle {
         display: block;
       }
+
+      .main-news {
+        grid-template-columns: 1fr;
+      }
+
+      .news-card {
+        max-width: 100%;
+      }
+
+      .news-title {
+        font-size: 18px;
+      }
+
+      .news-desc {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 100px 15px 30px;
+      }
+
+      .news-content {
+        padding: 15px;
+      }
+
+      .news-title {
+        font-size: 16px;
+      }
+
+      .sidebar h3 {
+        font-size: 16px;
+      }
+
+      .sidebar li {
+        margin-bottom: 12px;
+      }
     }
   </style>
 </head>

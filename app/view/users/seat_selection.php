@@ -46,20 +46,94 @@ require_once __DIR__ . '/../../../functions.php';
     .nav-links {
       list-style: none;
       display: flex;
-      gap: 30px;
+      gap: 20px;
       transition: all 0.3s ease;
     }
 
     .nav-links a {
       color: #fff;
       text-decoration: none;
-      font-size: 15px;
-      transition: color 0.3s;
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      transition: all 0.3s;
     }
 
     .nav-links a:hover,
     .nav-links a.active {
       color: #ffcc00;
+      background: rgba(255, 204, 0, 0.1);
+    }
+
+    .nav-dropdown {
+      position: relative;
+    }
+
+    .nav-dropdown>a::after {
+      content: ' ▼';
+      font-size: 12px;
+      margin-left: 5px;
+      transition: transform 0.3s ease;
+    }
+
+    .nav-dropdown:hover>a::after {
+      transform: rotate(180deg);
+    }
+
+    .nav-dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #111;
+      border: 1px solid rgba(255, 204, 0, 0.3);
+      border-radius: 8px;
+      min-width: 200px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+      z-index: 1000;
+      overflow: hidden;
+    }
+
+    .nav-dropdown:hover .nav-dropdown-content {
+      display: block;
+    }
+
+    .nav-dropdown-content a {
+      display: block;
+      padding: 12px 16px;
+      color: #fff;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .nav-dropdown-content a:hover {
+      background: rgba(255, 204, 0, 0.1);
+      color: #ffcc00;
+      padding-left: 20px;
+    }
+
+    .nav-dropdown-content a:last-child {
+      border-bottom: none;
+    }
+
+    .nav-dropdown-content a::before {
+      content: '▶';
+      position: absolute;
+      left: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 10px;
+      color: #666;
+      transition: all 0.3s;
+      opacity: 0;
+    }
+
+    .nav-dropdown-content a:hover::before {
+      opacity: 1;
+      color: #ffcc00;
+      left: 12px;
     }
 
     .btn-login {
@@ -357,9 +431,15 @@ require_once __DIR__ . '/../../../functions.php';
     <nav>
       <ul class="nav-links" id="nav-links">
         <li><a href="index.php">Home</a></li>
-        <li><a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a></li>
-        <li><a href="#movies">Sedang Tayang</a></li>
-        <li><a href="#news">Berita & Event</a></li>
+        <li class="nav-dropdown">
+          <a href="index.php?controller=user&action=pesanan">Film & Tiket</a>
+          <div class="nav-dropdown-content">
+            <a href="index.php?controller=user&action=pesanan">Pemesanan Tiket</a>
+            <a href="index.php?controller=user&action=purchaseHistory">Riwayat Pembelian</a>
+          </div>
+        </li>
+        <li><a href="index.php#movies">Sedang Tayang</a></li>
+        <li><a href="index.php?controller=user&action=beritaEvent">Berita & Event</a></li>
       </ul>
     </nav>
 

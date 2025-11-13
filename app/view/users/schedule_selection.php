@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../functions.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Pilih Jadwal - Cinema Tix</title>
-  <link rel="icon" type="images/png" href="tix_logo.png">
+  <link rel="icon" type="image/png" href="public/favicon.ico">
   <style>
     * {
       margin: 0;

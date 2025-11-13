@@ -36,18 +36,21 @@
       width: 100%;
       top: 0;
       z-index: 100;
+      flex-wrap: wrap;
     }
 
     .navbar-left {
       display: flex;
       align-items: center;
       gap: 20px;
+      flex-shrink: 0;
     }
 
     .navbar-right {
       display: flex;
       align-items: center;
       gap: 15px;
+      flex-shrink: 0;
     }
 
     .logo {

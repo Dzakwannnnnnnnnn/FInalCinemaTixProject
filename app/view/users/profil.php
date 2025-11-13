@@ -20,11 +20,12 @@ $user = $result->fetch_assoc();
 ?>
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Profil Saya | Cinematix</title>
-  <link rel="icon" type="image/png" href="tix_logo.png">
+  <link rel="icon" type="image/png" href="public/favicon.ico">
   <style>
     body {
       margin: 0;
@@ -114,6 +115,7 @@ $user = $result->fetch_assoc();
     }
   </style>
 </head>
+
 <body>
 
   <!-- Navbar -->
@@ -136,10 +138,11 @@ $user = $result->fetch_assoc();
       <div class="profile-item"><strong>Nama:</strong> <?= htmlspecialchars($user['nama']); ?></div>
       <div class="profile-item"><strong>Email:</strong> <?= htmlspecialchars($user['email']); ?></div>
       <div class="profile-item"><strong>Bergabung sejak:</strong> <?= htmlspecialchars($user['created_at']); ?></div>
-      
+
       <a href="logout.php" class="btn-logout">Keluar</a>
     </div>
   </section>
 
 </body>
+
 </html>

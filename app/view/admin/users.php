@@ -85,7 +85,7 @@
 <body class="bg-light">
   <div class="d-flex">
     <!-- Sidebar -->
-    <nav class="sidebar p-3" style="width: 280px; min-height: 100vh; position: fixed;">
+    <nav class="sidebar p-3" style="width: 280px; height: 100vh; position: fixed; top: 0; left: 0; overflow-y: auto;">
       <div class="text-center mb-4">
         <h4 class="fw-bold" style="color: #ffcc00;">🎬 Admin CinemaTix</h4>
         <small class="text-muted">Management System</small>

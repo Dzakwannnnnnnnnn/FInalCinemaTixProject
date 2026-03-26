@@ -1,15 +1,35 @@
 <?php
 // Pastikan path ini sesuai dengan struktur folder Anda
 require_once __DIR__ . '/../../../functions.php';
+
+$heroSlides = isset($heroSlides) && is_array($heroSlides) ? $heroSlides : [];
+if (empty($heroSlides)) {
+  $heroSlides = [
+    [
+      'image' => 'public/uploads/dune.jpg',
+      'title' => 'Nikmati Pengalaman Nonton',
+      'subtitle' => 'Temukan film terbaru dan jadwal bioskop favoritmu.',
+      'button_text' => 'Pesan Tiket Sekarang',
+      'button_link' => 'index.php?controller=user&action=pesanan'
+    ]
+  ];
+}
+
+$firstHero = $heroSlides[0];
+$basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '')), '/');
+$faviconIco = ($basePath !== '' ? $basePath : '') . '/public/favicon.ico';
+$faviconPng = ($basePath !== '' ? $basePath : '') . '/public/favicon.png';
 ?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">x
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cinema Tix</title>
-  <link rel="icon" type="image/png" href="public/favicon.png">
+  <link rel="shortcut icon" href="<?= htmlspecialchars($faviconIco) ?>">
+  <link rel="icon" type="image/x-icon" href="<?= htmlspecialchars($faviconIco) ?>">
+  <link rel="icon" type="image/png" href="<?= htmlspecialchars($faviconPng) ?>">
   <style>
     * {
       margin: 0;
@@ -625,12 +645,14 @@ require_once __DIR__ . '/../../../functions.php';
           </li>
           <li><a href="index.php#movies">Sedang Tayang</a></li>
           <li><a href="index.php?controller=user&action=beritaEvent">Berita & Event</a></li>
+          <li><a href="index.php?controller=user&action=about">About & Contact</a></li>
         </ul>
       </nav>
 
       <?php if (isLoggedIn()): ?>
         <div style="display: flex; align-items: center; gap: 15px;">
-          <span style="color: #fff; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+          <span style="color: #fff; font-weight:bold;">Halo,
+            <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'User' ?>!</span>
           <?php if (isAdmin()): ?>
             <a href="index.php?controller=admin&action=index" class="btn-login"
               style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>
@@ -653,9 +675,12 @@ require_once __DIR__ . '/../../../functions.php';
 
     <div class="hero-overlay"></div>
     <div class="hero-content">
-      <h1>Nikmati Pengalaman Nonton<br>Terbaik<br>Tanpa Antri di Bioskop</h1>
-      <p>Temukan film terbaru dan jadwal bioskop favoritmu.</p>
-      <a href="index.php?controller=user&action=pesanan" class="btn-primary">Pesan Tiket Sekarang</a>
+      <h1><?= nl2br(htmlspecialchars($firstHero['title'] ?? 'Nikmati Pengalaman Nonton')); ?></h1>
+      <p><?= htmlspecialchars($firstHero['subtitle'] ?? 'Temukan film terbaru dan jadwal bioskop favoritmu.'); ?></p>
+      <a href="<?= htmlspecialchars($firstHero['button_link'] ?? 'index.php?controller=user&action=pesanan'); ?>"
+        class="btn-primary">
+        <?= htmlspecialchars($firstHero['button_text'] ?? 'Pesan Tiket Sekarang'); ?>
+      </a>
     </div>
   </section>
 
@@ -754,6 +779,7 @@ require_once __DIR__ . '/../../../functions.php';
         </div>
       </div>
     </section>
+
   </main>
 
   <footer class="site-footer">
@@ -765,8 +791,8 @@ require_once __DIR__ . '/../../../functions.php';
       <div class="foot-center">
         <nav class="footer-nav">
           <a href="#">Home</a>
-          <a href="#">Tentang</a>
-          <a href="#">Kontak</a>
+          <a href="index.php?controller=user&action=about">Tentang</a>
+          <a href="index.php?controller=user&action=about#contact">Kontak</a>
         </nav>
       </div>
       <div class="foot-right">
@@ -781,11 +807,12 @@ require_once __DIR__ . '/../../../functions.php';
 
   <script>
     // Smooth slideshow dengan multiple background layers
-    const images = [
-      "public/uploads/dune.jpg",
-      "public/uploads/star.jpg",
-      "public/uploads/gost.jpg"
-    ];
+    const heroSlides = <?= json_encode($heroSlides, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+    const images = heroSlides.map(slide => slide.image).filter(Boolean);
+    const slideTitles = heroSlides.map(slide => slide.title || '');
+    const slideSubtitles = heroSlides.map(slide => slide.subtitle || '');
+    const slideButtonTexts = heroSlides.map(slide => slide.button_text || 'Pesan Tiket Sekarang');
+    const slideButtonLinks = heroSlides.map(slide => slide.button_link || 'index.php?controller=user&action=pesanan');
 
     let currentIndex = 0;
     let nextIndex = 1;
@@ -805,13 +832,15 @@ require_once __DIR__ . '/../../../functions.php';
       const bg2 = document.getElementById('bg2');
       const bg3 = document.getElementById('bg3');
 
+      if (!images.length) return;
+
       // Set background pertama
       bg1.style.backgroundImage = `url('${images[0]}')`;
       bg1.classList.add('active');
 
-      // Preload dan set background kedua
-      bg2.style.backgroundImage = `url('${images[1]}')`;
-      bg3.style.backgroundImage = `url('${images[2]}')`;
+      // Preload dan set background berikutnya (dengan fallback aman)
+      bg2.style.backgroundImage = `url('${images[1] || images[0]}')`;
+      bg3.style.backgroundImage = `url('${images[2] || images[0]}')`;
     }
 
     // Transisi slideshow yang smooth
@@ -837,6 +866,19 @@ require_once __DIR__ . '/../../../functions.php';
       currentIndex = nextIndex;
       nextIndex = (nextIndex + 1) % images.length;
 
+      // Sync text/button dengan slide aktif
+      const heroTitle = document.querySelector('.hero-content h1');
+      const heroSubtitle = document.querySelector('.hero-content p');
+      const heroButton = document.querySelector('.hero-content .btn-primary');
+      if (heroTitle)
+        heroTitle.innerHTML = (slideTitles[currentIndex] || '').replace(/\n/g, '<br>');
+      if (heroSubtitle)
+        heroSubtitle.textContent = slideSubtitles[currentIndex] || '';
+      if (heroButton) {
+        heroButton.textContent = slideButtonTexts[currentIndex] || 'Pesan Tiket Sekarang';
+        heroButton.href = slideButtonLinks[currentIndex] || 'index.php?controller=user&action=pesanan';
+      }
+
       // Preload gambar berikutnya
       const futureIndex = (nextIndex + 1) % images.length;
       const futureBg = backgrounds[futureIndex % 3];
@@ -849,13 +891,17 @@ require_once __DIR__ . '/../../../functions.php';
     }
 
     // Jalankan slideshow
-    preloadImages();
-    initSlideshow();
+    if (images.length > 0) {
+      preloadImages();
+      initSlideshow();
 
-    // Tunggu sebentar sebelum memulai transisi pertama
-    setTimeout(() => {
-      setInterval(changeBackground, 5000);
-    }, 3000);
+      if (images.length > 1) {
+        // Tunggu sebentar sebelum memulai transisi pertama
+        setTimeout(() => {
+          setInterval(changeBackground, 5000);
+        }, 3000);
+      }
+    }
 
     // Navbar toggle
     const menuToggle = document.getElementById("menu-toggle");

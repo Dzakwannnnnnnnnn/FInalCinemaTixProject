@@ -189,7 +189,8 @@
     </nav>
     <?php if (isLoggedIn()): ?>
       <div style="display: flex; align-items: center; gap: 15px;">
-        <span style="color: #ddd; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+        <span style="color: #ddd; font-weight:bold;">Halo,
+          <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'User' ?>!</span>
         <?php if (isAdmin()): ?>
           <a href="index.php?controller=admin&action=index" class="btn-login"
             style="background: #ffd700; color: #111; padding: 8px 15px;">Admin Panel</a>

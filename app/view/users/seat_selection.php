@@ -445,7 +445,8 @@ require_once __DIR__ . '/../../../functions.php';
 
     <?php if (isLoggedIn()): ?>
       <div style="display: flex; align-items: center; gap: 15px;">
-        <span style="color: #fff; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+        <span style="color: #fff; font-weight:bold;">Halo,
+          <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'User' ?>!</span>
         <?php if (isAdmin()): ?>
           <a href="index.php?controller=admin&action=index" class="btn-login"
             style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>
@@ -520,10 +521,12 @@ require_once __DIR__ . '/../../../functions.php';
   <script>
     let selectedSeats = [];
     let seatPrice = <?= $jadwal['harga_tiket'] ?? 0 ?>;
+    let seatRefreshTimer = null;
 
     // Load seats when page loads
     document.addEventListener('DOMContentLoaded', function () {
       loadSeats();
+      seatRefreshTimer = setInterval(loadSeats, 5000);
     });
 
     function loadSeats() {
@@ -538,6 +541,11 @@ require_once __DIR__ . '/../../../functions.php';
       fetch(`index.php?controller=booking&action=getAvailableSeats&jadwal_id=${jadwalId}`)
         .then(response => response.json())
         .then(data => {
+          if (data.error) {
+            document.getElementById('seatsContainer').innerHTML = `<p style="color: #ff8080; text-align: center;">${data.error}</p>`;
+            document.getElementById('btnBook').disabled = true;
+            return;
+          }
           renderSeats(data.availableSeats, data.bookedSeats);
         })
         .catch(error => {
@@ -550,6 +558,10 @@ require_once __DIR__ . '/../../../functions.php';
     function renderSeats(availableSeats, bookedSeats) {
       const seatsContainer = document.getElementById('seatsContainer');
       seatsContainer.innerHTML = '';
+
+      const bookedSeatIds = bookedSeats.map(bs => String(bs.kursi_id));
+      selectedSeats = selectedSeats.filter(seatId => !bookedSeatIds.includes(String(seatId)));
+      updateSummary();
 
       // Group seats by row
       const seatsByRow = {};
@@ -574,10 +586,12 @@ require_once __DIR__ . '/../../../functions.php';
 
         seatsByRow[row].forEach(seat => {
           const seatDiv = document.createElement('div');
-          const isBooked = bookedSeats.some(bs => bs.kursi_id === seat.kursi_id);
-          seatDiv.className = `seat ${isBooked ? 'booked' : 'available'}`;
+          const seatId = String(seat.kursi_id);
+          const isBooked = bookedSeatIds.includes(seatId);
+          const isSelected = selectedSeats.includes(seatId);
+          seatDiv.className = `seat ${isBooked ? 'booked' : (isSelected ? 'selected' : 'available')}`;
           seatDiv.textContent = seat.nomor_kursi;
-          seatDiv.dataset.seatId = seat.kursi_id;
+          seatDiv.dataset.seatId = seatId;
           if (!isBooked) {
             seatDiv.onclick = () => toggleSeat(seatDiv);
           }
@@ -643,7 +657,11 @@ require_once __DIR__ . '/../../../functions.php';
     }
 
     function updateSummary() {
-      const selectedSeatsText = selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Belum ada';
+      const selectedSeatLabels = selectedSeats.map(seatId => {
+        const seatEl = document.querySelector(`.seat[data-seat-id="${seatId}"]`);
+        return seatEl ? seatEl.textContent : seatId;
+      });
+      const selectedSeatsText = selectedSeatLabels.length > 0 ? selectedSeatLabels.join(', ') : 'Belum ada';
       const seatCount = selectedSeats.length;
       const totalPrice = seatCount * seatPrice;
 
@@ -683,6 +701,12 @@ require_once __DIR__ . '/../../../functions.php';
       link.addEventListener('click', () => {
         navLinks.classList.remove('active');
       });
+    });
+
+    window.addEventListener('beforeunload', () => {
+      if (seatRefreshTimer) {
+        clearInterval(seatRefreshTimer);
+      }
     });
   </script>
 </body>

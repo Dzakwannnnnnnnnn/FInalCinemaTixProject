@@ -6,6 +6,8 @@ require_once __DIR__ . '/../model/UserModel.php';
 require_once __DIR__ . '/../model/StudioModel.php';
 require_once __DIR__ . '/../model/BookingModel.php';
 require_once __DIR__ . '/../model/PaymentModel.php';
+require_once __DIR__ . '/../model/HeroSlideModel.php';
+require_once __DIR__ . '/../model/SiteContentModel.php';
 
 class AdminController
 {
@@ -17,6 +19,8 @@ class AdminController
   private $jadwalModel;
   private $bookingModel;
   private $paymentModel;
+  private $heroSlideModel;
+  private $siteContentModel;
 
   public function __construct()
   {
@@ -29,6 +33,8 @@ class AdminController
     $this->jadwalModel = new JadwalModel();
     $this->bookingModel = new BookingModel();
     $this->paymentModel = new PaymentModel();
+    $this->heroSlideModel = new HeroSlideModel();
+    $this->siteContentModel = new SiteContentModel();
   }
 
   // Dashboard Admin
@@ -491,6 +497,26 @@ class AdminController
   // Booking Management
   public function bookings()
   {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $selectedIds = $_POST['selected_booking_ids'] ?? [];
+
+      if (!is_array($selectedIds) || empty($selectedIds)) {
+        setFlashMessage('error', 'Pilih minimal satu booking untuk dihapus');
+        header('Location: index.php?controller=admin&action=bookings');
+        exit;
+      }
+
+      $deletedCount = $this->bookingModel->deleteBookingsByIds($selectedIds);
+      if ($deletedCount > 0) {
+        setFlashMessage('success', $deletedCount . ' booking berhasil dihapus');
+      } else {
+        setFlashMessage('error', 'Tidak ada booking yang berhasil dihapus');
+      }
+
+      header('Location: index.php?controller=admin&action=bookings');
+      exit;
+    }
+
     $bookings = $this->bookingModel->getAllBookings();
     require_once __DIR__ . '/../view/admin/bookings.php';
   }
@@ -549,11 +575,163 @@ class AdminController
     exit;
   }
 
+  // News Management (Berita & Event)
+  public function beritaEvent()
+  {
+    $news = $this->newsModel->getAllNews();
+    require_once __DIR__ . '/../view/admin/news.php';
+  }
+
   // Payment Management
   public function payments()
   {
     $payments = $this->paymentModel->getAllPayments();
     require_once __DIR__ . '/../view/admin/payments.php';
+  }
+
+  // Homepage Slider Management
+  public function heroSlides()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $operation = $_POST['operation'] ?? '';
+
+      if ($operation === 'add') {
+        if (!isset($_FILES['slide_image']) || $_FILES['slide_image']['error'] !== UPLOAD_ERR_OK) {
+          setFlashMessage('error', 'Gambar slide wajib diupload');
+          header('Location: index.php?controller=admin&action=heroSlides');
+          exit;
+        }
+
+        $uploaded = uploadImage($_FILES['slide_image']);
+        if (!$uploaded) {
+          setFlashMessage('error', 'Gagal upload gambar slide');
+          header('Location: index.php?controller=admin&action=heroSlides');
+          exit;
+        }
+
+        $this->heroSlideModel->addSlide([
+          'image' => 'public/uploads/' . $uploaded,
+          'title' => sanitize($_POST['title'] ?? ''),
+          'subtitle' => sanitize($_POST['subtitle'] ?? ''),
+          'button_text' => sanitize($_POST['button_text'] ?? 'Pesan Tiket Sekarang'),
+          'button_link' => sanitize($_POST['button_link'] ?? 'index.php?controller=user&action=pesanan')
+        ]);
+
+        setFlashMessage('success', 'Slide berhasil ditambahkan');
+        header('Location: index.php?controller=admin&action=heroSlides');
+        exit;
+      }
+
+      if ($operation === 'update') {
+        $id = (int) ($_POST['id'] ?? 0);
+        $existing = $this->heroSlideModel->getSlideById($id);
+
+        if (!$existing) {
+          setFlashMessage('error', 'Slide tidak ditemukan');
+          header('Location: index.php?controller=admin&action=heroSlides');
+          exit;
+        }
+
+        $imagePath = $existing['image'] ?? '';
+        if (isset($_FILES['slide_image']) && $_FILES['slide_image']['error'] === UPLOAD_ERR_OK) {
+          $uploaded = uploadImage($_FILES['slide_image']);
+          if ($uploaded) {
+            if (!empty($imagePath) && str_starts_with($imagePath, 'public/uploads/')) {
+              $oldFile = __DIR__ . '/../../' . $imagePath;
+              if (file_exists($oldFile)) {
+                @unlink($oldFile);
+              }
+            }
+            $imagePath = 'public/uploads/' . $uploaded;
+          }
+        }
+
+        $this->heroSlideModel->updateSlide($id, [
+          'image' => $imagePath,
+          'title' => sanitize($_POST['title'] ?? ''),
+          'subtitle' => sanitize($_POST['subtitle'] ?? ''),
+          'button_text' => sanitize($_POST['button_text'] ?? 'Pesan Tiket Sekarang'),
+          'button_link' => sanitize($_POST['button_link'] ?? 'index.php?controller=user&action=pesanan'),
+          'sort_order' => (int) ($_POST['sort_order'] ?? ($existing['sort_order'] ?? 0))
+        ]);
+
+        setFlashMessage('success', 'Slide berhasil diupdate');
+        header('Location: index.php?controller=admin&action=heroSlides');
+        exit;
+      }
+
+      if ($operation === 'delete') {
+        $id = (int) ($_POST['id'] ?? 0);
+        $existing = $this->heroSlideModel->getSlideById($id);
+
+        if (!$existing) {
+          setFlashMessage('error', 'Slide tidak ditemukan');
+          header('Location: index.php?controller=admin&action=heroSlides');
+          exit;
+        }
+
+        if (!empty($existing['image']) && str_starts_with($existing['image'], 'public/uploads/')) {
+          $filePath = __DIR__ . '/../../' . $existing['image'];
+          if (file_exists($filePath)) {
+            @unlink($filePath);
+          }
+        }
+
+        $this->heroSlideModel->deleteSlide($id);
+        setFlashMessage('success', 'Slide berhasil dihapus');
+        header('Location: index.php?controller=admin&action=heroSlides');
+        exit;
+      }
+    }
+
+    $slides = $this->heroSlideModel->getAllSlides();
+    require_once __DIR__ . '/../view/admin/heroSlides.php';
+  }
+
+  public function siteContent()
+  {
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+      $content = $this->siteContentModel->getContent();
+
+      $content['contact'] = [
+        'headline' => sanitize($_POST['contact_headline'] ?? ''),
+        'address' => sanitize($_POST['contact_address'] ?? ''),
+        'email' => sanitizeEmail($_POST['contact_email'] ?? ''),
+        'phone' => sanitize($_POST['contact_phone'] ?? ''),
+        'hours' => sanitize($_POST['contact_hours'] ?? ''),
+        'badge' => sanitize($_POST['contact_badge'] ?? ''),
+        'highlight_title' => sanitize($_POST['contact_highlight_title'] ?? ''),
+        'highlight_body' => sanitize($_POST['contact_highlight_body'] ?? ''),
+        'highlight_note' => sanitize($_POST['contact_highlight_note'] ?? '')
+      ];
+
+      $content['about'] = [
+        'hero_title' => sanitize($_POST['about_hero_title'] ?? ''),
+        'hero_subtitle' => sanitize($_POST['about_hero_subtitle'] ?? ''),
+        'story_title' => sanitize($_POST['about_story_title'] ?? ''),
+        'story_body' => sanitize($_POST['about_story_body'] ?? ''),
+        'vision_title' => sanitize($_POST['about_vision_title'] ?? ''),
+        'vision_body' => sanitize($_POST['about_vision_body'] ?? ''),
+        'mission_title' => sanitize($_POST['about_mission_title'] ?? ''),
+        'mission_body' => sanitize($_POST['about_mission_body'] ?? ''),
+        'closing_text' => sanitize($_POST['about_closing_text'] ?? '')
+      ];
+
+      if ($this->siteContentModel->updateSections($content)) {
+        setFlashMessage('success', 'Konten Contact dan About berhasil diupdate');
+      } else {
+        setFlashMessage('error', 'Gagal mengupdate konten situs');
+      }
+
+      header('Location: index.php?controller=admin&action=siteContent');
+      exit;
+    }
+
+    $content = $this->siteContentModel->getContent();
+    $contact = $content['contact'] ?? [];
+    $about = $content['about'] ?? [];
+
+    require_once __DIR__ . '/../view/admin/siteContent.php';
   }
 
   public function viewPayment()
@@ -570,57 +748,57 @@ class AdminController
     require_once __DIR__ . '/../view/admin/viewPayment.php';
   }
 
-public function editPayment()
-{
+  public function editPayment()
+  {
     $id = $_GET['id'] ?? 0;
     $payment = $this->paymentModel->getPaymentById($id);
 
     if (!$payment) {
-        setFlashMessage('error', 'Payment tidak ditemukan');
-        header('Location: index.php?controller=admin&action=payments');
-        exit;
+      setFlashMessage('error', 'Payment tidak ditemukan');
+      header('Location: index.php?controller=admin&action=payments');
+      exit;
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $status = $_POST['status'] ?? '';
-        
-        // Validate and sanitize status
-        $allowedStatuses = ['pending', 'completed', 'failed', 'canceled'];
-        if (!in_array($status, $allowedStatuses)) {
-            $_SESSION['flash_message'] = [
-                'type' => 'danger',
-                'message' => 'Invalid status value'
-            ];
-            header('Location: index.php?controller=admin&action=payments');
-            exit;
-        }
-        
-        // Debug: log the update attempt
-        error_log("Attempting to update payment $id to status: $status");
-        
-        if ($this->paymentModel->updatePaymentStatus($id, $status)) {
-            $_SESSION['flash_message'] = [
-                'type' => 'success',
-                'message' => 'Payment status updated successfully'
-            ];
-            
-            // Refresh the payment data after update
-            $payment = $this->paymentModel->getPaymentById($id);
-            error_log("Payment $id updated successfully to: " . $payment['status']);
-        } else {
-            $_SESSION['flash_message'] = [
-                'type' => 'danger',
-                'message' => 'Failed to update payment status'
-            ];
-            error_log("Failed to update payment $id");
-        }
-        
-        header('Location: index.php?controller=admin&action=viewPayment&id=' . $id);
+      $status = $_POST['status'] ?? '';
+
+      // Validate and sanitize status
+      $allowedStatuses = ['pending', 'completed', 'failed', 'canceled'];
+      if (!in_array($status, $allowedStatuses)) {
+        $_SESSION['flash_message'] = [
+          'type' => 'danger',
+          'message' => 'Invalid status value'
+        ];
+        header('Location: index.php?controller=admin&action=payments');
         exit;
+      }
+
+      // Debug: log the update attempt
+      error_log("Attempting to update payment $id to status: $status");
+
+      if ($this->paymentModel->updatePaymentStatus($id, $status)) {
+        $_SESSION['flash_message'] = [
+          'type' => 'success',
+          'message' => 'Payment status updated successfully'
+        ];
+
+        // Refresh the payment data after update
+        $payment = $this->paymentModel->getPaymentById($id);
+        error_log("Payment $id updated successfully to: " . $payment['status']);
+      } else {
+        $_SESSION['flash_message'] = [
+          'type' => 'danger',
+          'message' => 'Failed to update payment status'
+        ];
+        error_log("Failed to update payment $id");
+      }
+
+      header('Location: index.php?controller=admin&action=viewPayment&id=' . $id);
+      exit;
     }
 
     require_once __DIR__ . '/../view/admin/editPayment.php';
-}
+  }
   public function deletePayment()
   {
     $id = $_GET['id'] ?? 0;

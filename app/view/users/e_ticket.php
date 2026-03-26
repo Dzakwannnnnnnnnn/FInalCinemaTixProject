@@ -1,283 +1,233 @@
 <?php
 require_once __DIR__ . '/../../../functions.php';
-?>
 
+$seats = explode(', ', $bookingData['nomor_kursi'] ?? '');
+$seatCount = (int) ($bookingData['seat_count'] ?? 1);
+$ticketPrice = (int) ($jadwal['harga_tiket'] ?? 0);
+$totalTransaction = (int) (($total_ticket_price ?? 0) + ($admin_fee ?? 0));
+?>
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>E-Ticket - CinemaTix</title>
+  <title>E-Ticket Thermal 80mm - CinemaTix</title>
   <style>
+    :root {
+      --paper-width: 80mm;
+      --font-main: "Courier New", Courier, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
-      font-family: Arial, sans-serif;
-      background-color: #000;
-      color: #fff;
       margin: 0;
-      padding: 20px;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .ticket-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 30px;
-    }
-
-    .e-ticket {
-      background-color: #fff;
-      border: 2px solid #ffcc00;
-      border-radius: 10px;
-      width: 13cm;
-      height: 5cm;
-      position: relative;
-      display: flex;
-      align-items: center;
-      padding: 10px;
-      box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
-    }
-
-    .e-ticket::before,
-    .e-ticket::after {
-      content: '';
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background-color: #000;
-      border: 2px solid #ffcc00;
-      border-radius: 50%;
-      top: 50%;
-      transform: translateY(-50%);
-    }
-
-    .e-ticket::before {
-      left: -10px;
-    }
-
-    .e-ticket::after {
-      right: -10px;
-    }
-
-    .ticket-info {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 5px;
-      font-size: 8px;
-    }
-
-    .info-item {
-      background-color: #f0f0f0;
-      padding: 3px;
-      border-radius: 3px;
-      border: 1px solid #ccc;
-    }
-
-    .info-label {
-      color: #666;
-      font-size: 6px;
-      text-transform: uppercase;
-      margin-bottom: 2px;
-    }
-
-    .info-value {
+      padding: 16px;
+      font-family: var(--font-main);
+      background: #f2f2f2;
       color: #000;
-      font-size: 8px;
-      font-weight: bold;
     }
 
-    .barcode-section {
-      margin-left: 10px;
+    .tickets-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .receipt {
+      width: var(--paper-width);
+      background: #fff;
+      border: 1px solid #000;
+      padding: 10px 8px;
+    }
+
+    .center {
       text-align: center;
     }
 
-    .barcode-title {
-      color: #ffcc00;
-      font-size: 8px;
-      margin-bottom: 3px;
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 2px;
+    }
+
+    .subtitle {
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .divider {
+      border-top: 1px dashed #000;
+      margin: 6px 0;
+    }
+
+    .kv {
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .kv .label {
+      font-weight: 700;
+      display: inline-block;
+      min-width: 78px;
+    }
+
+    .film-title {
+      font-size: 12px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      word-break: break-word;
+    }
+
+    .barcode-wrap {
+      margin-top: 8px;
+      text-align: center;
     }
 
     .barcode {
-      width: 60px;
-      height: 20px;
+      width: 58mm;
+      max-width: 100%;
+      height: 15mm;
+      object-fit: contain;
+      image-rendering: crisp-edges;
     }
 
-    .print-instruction {
-      color: #ccc;
-      font-size: 6px;
-      margin-top: 3px;
-      line-height: 1.1;
+    .barcode-text {
+      font-size: 10px;
+      margin-top: 2px;
+      word-break: break-all;
     }
 
-    /* ✅ FIX: bagian print */
+    .footer-note {
+      margin-top: 6px;
+      text-align: center;
+      font-size: 10px;
+      line-height: 1.35;
+    }
+
+    .cut-line {
+      width: var(--paper-width);
+      border-top: 1px dashed #888;
+      text-align: center;
+      font-size: 9px;
+      color: #666;
+      padding-top: 2px;
+    }
+
+    .actions {
+      margin-top: 14px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid #000;
+      background: #fff;
+      color: #000;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: #000;
+      color: #fff;
+    }
+
     @media print {
-
-      html,
       body {
-        background: white !important;
-        margin: 0;
+        background: #fff;
         padding: 0;
-        height: 100%;
-        overflow: hidden;
+        margin: 0;
       }
 
-      .ticket-container {
+      .tickets-wrap {
+        gap: 0;
+      }
+
+      .receipt {
+        border: none;
+        width: 80mm;
         margin: 0;
-        padding: 0;
-        height: auto;
-        display: flex;
-        justify-content: center;
-        align-items: center;
+        padding: 6mm 4mm 4mm 4mm;
         page-break-inside: avoid;
       }
 
-      .e-ticket {
-        border: 2px solid #000 !important;
-        box-shadow: none !important;
-        margin: 0 auto;
-        page-break-inside: avoid;
-        transform: scale(1);
+      .cut-line {
+        width: 80mm;
+        margin: 0;
+        padding-bottom: 4mm;
+        page-break-after: always;
       }
 
-      .e-ticket::before,
-      .e-ticket::after {
-        background-color: white !important;
-        border: 2px solid #000 !important;
-      }
-
-      .info-item {
-        background-color: #f0f0f0 !important;
-        border: 1px solid #000 !important;
-      }
-
-      .info-label {
-        color: #666 !important;
-      }
-
-      .info-value {
-        color: #000 !important;
-      }
-
-      .barcode-title {
-        color: #000 !important;
-        font-weight: bold !important;
-      }
-
-      .print-instruction {
-        color: #666 !important;
-      }
-
-      .action-buttons {
+      .actions {
         display: none !important;
       }
 
-      /* ✅ Set ukuran dan margin halaman fix */
       @page {
-        size: A4;
+        size: 80mm auto;
         margin: 0;
       }
     }
   </style>
-
 </head>
 
 <body>
-  <div class="ticket-container">
-    <div class="e-ticket">
-      <div class="ticket-info">
-        <div class="info-item">
-          <div class="info-label">Film</div>
-          <div class="info-value"><?= htmlspecialchars($booking['judul'] ?? 'N/A') ?></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Tanggal & Waktu</div>
-          <div class="info-value">
-            <?= date('d F Y', strtotime($booking['tanggal'] ?? '')) ?><br>
-            <?= date('H:i', strtotime($booking['jam_mulai'] ?? '')) ?>
-          </div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Studio</div>
-          <div class="info-value"><?= htmlspecialchars($booking['nama_studio'] ?? 'N/A') ?>
-            (<?= htmlspecialchars($booking['tipe'] ?? 'N/A') ?>)</div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Kursi</div>
-          <div class="info-value"><?= htmlspecialchars($booking['nomor_kursi'] ?? 'N/A') ?></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Booking ID</div>
-          <div class="info-value">#<?= htmlspecialchars($booking_id ?? 'N/A') ?></div>
-        </div>
-        <div class="info-item">
-          <div class="info-label">Total Biaya</div>
-          <div class="info-value">Rp <?= number_format(($total_ticket_price ?? 0) + ($admin_fee ?? 0), 0, ',', '.') ?>
-          </div>
+  <div class="tickets-wrap">
+    <?php for ($i = 0; $i < ($seatCount > 0 ? $seatCount : 1); $i++): ?>
+      <?php
+      $seatNumber = $seats[$i] ?? 'N/A';
+      $currentBookingId = $bookingData['booking_ids'][$i] ?? $booking_id ?? 'N/A';
+      ?>
+      <section class="receipt">
+        <div class="center">
+          <div class="title">CINEMATIX E-TICKET</div>
+          <div class="subtitle">Valid untuk 1 kursi</div>
         </div>
 
-      </div>
+        <div class="divider"></div>
 
-      <div class="barcode-section">
-        <div class="barcode-title">Scan untuk Print</div>
-        <img src="data:image/png;base64,<?= $barcode ?? '' ?>" alt="Barcode" class="barcode">
-        <div class="print-instruction">
-          Tunjukkan di loket untuk cetak tiket
+        <div class="film-title"><?= htmlspecialchars($bookingData['judul'] ?? 'N/A') ?></div>
+
+        <div class="kv"><span class="label">Tanggal</span>: <?= date('d-m-Y', strtotime($bookingData['tanggal'] ?? '')) ?></div>
+        <div class="kv"><span class="label">Jam</span>: <?= date('H:i', strtotime($bookingData['jam_mulai'] ?? '')) ?></div>
+        <div class="kv"><span class="label">Studio</span>: <?= htmlspecialchars($bookingData['nama_studio'] ?? 'N/A') ?></div>
+        <div class="kv"><span class="label">Tipe</span>: <?= htmlspecialchars($bookingData['tipe'] ?? 'N/A') ?></div>
+        <div class="kv"><span class="label">Kursi</span>: <?= htmlspecialchars($seatNumber) ?></div>
+        <div class="kv"><span class="label">Booking ID</span>: #<?= htmlspecialchars($currentBookingId) ?></div>
+        <div class="kv"><span class="label">Harga Tiket</span>: Rp <?= number_format($ticketPrice, 0, ',', '.') ?></div>
+        <?php if ($admin_fee > 0): ?>
+          <div class="kv"><span class="label">Admin</span>: Rp <?= number_format((int) $admin_fee, 0, ',', '.') ?></div>
+        <?php endif; ?>
+        <div class="kv"><span class="label">Total Transaksi</span>: Rp <?= number_format($totalTransaction, 0, ',', '.') ?></div>
+
+        <div class="barcode-wrap">
+          <img src="data:image/png;base64,<?= $barcode ?? '' ?>" alt="Barcode" class="barcode">
+          <div class="barcode-text"><?= htmlspecialchars((string) $currentBookingId) ?></div>
         </div>
-      </div>
-    </div>
 
-    <div class="action-buttons">
-      <button class="btn-print" onclick="window.print()">Print E-Ticket</button>
-      <a href="index.php" class="btn-back">Kembali ke Beranda</a>
-    </div>
+        <div class="footer-note">
+          Tunjukkan tiket ini saat masuk studio.<br>
+          Simpan struk sampai film selesai.
+        </div>
+      </section>
+      <div class="cut-line">----- potong di sini -----</div>
+    <?php endfor; ?>
   </div>
 
-  <style>
-    .action-buttons {
-      display: flex;
-      gap: 15px;
-      justify-content: center;
-      margin-top: 30px;
-    }
-
-    .btn-print {
-      background-color: #ffcc00;
-      color: #000;
-      font-weight: bold;
-      padding: 12px 30px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-size: 16px;
-      transition: 0.3s;
-    }
-
-    .btn-print:hover {
-      background-color: #ffd633;
-    }
-
-    .btn-back {
-      background-color: transparent;
-      color: #ffcc00;
-      border: 1px solid #ffcc00;
-      padding: 12px 30px;
-      border-radius: 8px;
-      text-decoration: none;
-      font-size: 16px;
-      transition: 0.3s;
-    }
-
-    .btn-back:hover {
-      background-color: #ffcc00;
-      color: #000;
-    }
-  </style>
+  <div class="actions">
+    <button class="btn" onclick="window.print()">Print Thermal 80mm</button>
+    <a href="index.php" class="btn">Kembali ke Beranda</a>
+  </div>
 </body>
 
 </html>

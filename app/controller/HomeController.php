@@ -3,6 +3,8 @@
 require_once __DIR__ . '/../../config/koneksi.php';
 require_once __DIR__ . '/../model/FilmModel.php';
 require_once __DIR__ . '/../model/NewsModel.php';
+require_once __DIR__ . '/../model/HeroSlideModel.php';
+require_once __DIR__ . '/../model/SiteContentModel.php';
 
 class HomeController
 {
@@ -13,6 +15,9 @@ class HomeController
 
     $newsModel = new NewsModel();
     $news = $newsModel->getLatestNews(3); // Get only 3 latest news
+
+    $heroSlideModel = new HeroSlideModel();
+    $heroSlides = $heroSlideModel->getAllSlides();
 
     // arahkan ke halaman utama
     require_once __DIR__ . '/../view/users/index.php';

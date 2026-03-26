@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../functions.php';
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Berita & Event | Cinematix</title>
-  <link rel="icon" type="image/png" href="public/favicon.ico">
+  <link rel="icon" type="image/png" href="public/favicon.png">
   <style>
     * {
       margin: 0;
@@ -378,7 +378,8 @@ require_once __DIR__ . '/../../../functions.php';
     </nav>
     <?php if (isLoggedIn()): ?>
       <div style="display: flex; align-items: center; gap: 15px;">
-        <span style="color: #fff; font-weight:bold;">Halo, <?= htmlspecialchars($_SESSION['user_name']) ?>!</span>
+        <span style="color: #fff; font-weight:bold;">Halo,
+          <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'User' ?>!</span>
         <?php if (isAdmin()): ?>
           <a href="index.php?controller=admin&action=index" class="btn-login"
             style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>

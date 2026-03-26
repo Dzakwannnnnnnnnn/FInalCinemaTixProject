@@ -44,6 +44,18 @@ class KursiModel
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
   }
 
+  // Get all active seats for a schedule's studio
+  public function getSeatsByJadwal($jadwal_id)
+  {
+    $query = "SELECT k.* FROM kursi k
+              JOIN jadwal j ON k.studio_id = j.studio_id
+              WHERE j.jadwal_id = ? AND k.status = 'aktif'
+              ORDER BY k.nomor_kursi";
+    $stmt = $this->db->getConnection()->prepare($query);
+    $stmt->execute([$jadwal_id]);
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+  }
+
   // Add new seat
   public function addKursi($studio_id, $nomor_kursi, $status = 'aktif')
   {

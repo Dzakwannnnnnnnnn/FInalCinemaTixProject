@@ -321,6 +321,10 @@ require_once __DIR__ . '/../../../functions.php';
                 <span class="detail-value"><?= htmlspecialchars($item['seat']) ?></span>
               </div>
               <div class="detail-row">
+                <span class="detail-label">Jumlah Tiket:</span>
+                <span class="detail-value"><?= (int) ($item['seat_count'] ?? 1) ?> tiket</span>
+              </div>
+              <div class="detail-row">
                 <span class="detail-label">Tanggal Pembelian:</span>
                 <span class="detail-value"><?= date('d M Y H:i', strtotime($item['purchase_date'])) ?></span>
               </div>

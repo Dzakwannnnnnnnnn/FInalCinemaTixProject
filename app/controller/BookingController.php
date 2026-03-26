@@ -6,9 +6,24 @@ require_once __DIR__ . '/../model/JadwalModel.php';
 require_once __DIR__ . '/../model/KursiModel.php';
 require_once __DIR__ . '/../model/BookingModel.php';
 require_once __DIR__ . '/../model/PaymentModel.php';
+require_once __DIR__ . '/../model/StudioModel.php';
 
 class BookingController
 {
+  private function isScheduleExpired($jadwal)
+  {
+    if (!$jadwal || empty($jadwal['tanggal']) || empty($jadwal['jam_mulai'])) {
+      return true;
+    }
+
+    $showTimestamp = strtotime($jadwal['tanggal'] . ' ' . $jadwal['jam_mulai']);
+    if ($showTimestamp === false) {
+      return true;
+    }
+
+    return $showTimestamp <= time();
+  }
+
   public function selectSchedule()
   {
     startSession();
@@ -64,6 +79,11 @@ class BookingController
       return;
     }
 
+    if ($this->isScheduleExpired($jadwal)) {
+      echo "Jadwal sudah habis.";
+      return;
+    }
+
     $film = $filmModel->getFilmById($jadwal['film_id']);
     $jadwalList = $jadwalModel->getJadwalByFilmId($jadwal['film_id']);
 
@@ -81,10 +101,17 @@ class BookingController
       return;
     }
 
+    $jadwalModel = new JadwalModel();
     $kursiModel = new KursiModel();
     $bookingModel = new BookingModel();
+    $jadwal = $jadwalModel->getJadwalById($jadwal_id);
 
-    $availableSeats = $kursiModel->getAvailableSeats($jadwal_id);
+    if (!$jadwal || $this->isScheduleExpired($jadwal)) {
+      echo json_encode(['error' => 'Jadwal sudah habis']);
+      return;
+    }
+
+    $availableSeats = $kursiModel->getSeatsByJadwal($jadwal_id);
     $bookedSeats = $bookingModel->getBookedSeats($jadwal_id);
 
     echo json_encode([
@@ -95,6 +122,7 @@ class BookingController
 
   public function selectPaymentMethod()
   {
+    startSession();
     // Check if user is logged in
     if (!isset($_SESSION['user_id'])) {
       header('Location: index.php?controller=auth&action=login');
@@ -125,6 +153,11 @@ class BookingController
     $filmModel = new FilmModel();
 
     $jadwal = $jadwalModel->getJadwalById($jadwal_id);
+    if (!$jadwal || $this->isScheduleExpired($jadwal)) {
+      echo "Jadwal sudah habis.";
+      return;
+    }
+
     $film = $filmModel->getFilmById($jadwal['film_id']);
     $kursi_ids_array = is_array($kursi_ids) ? $kursi_ids : explode(',', $kursi_ids);
     $total_harga = $jadwal['harga_tiket'] * count($kursi_ids_array);
@@ -135,6 +168,7 @@ class BookingController
 
   public function processPayment()
   {
+    startSession();
     // Check if user is logged in
     if (!isset($_SESSION['user_id'])) {
       header('Location: index.php?controller=auth&action=login');
@@ -165,6 +199,12 @@ class BookingController
 
     // Get jadwal and film info for display
     $jadwal = $jadwalModel->getJadwalById($jadwal_id);
+    if (!$jadwal || $this->isScheduleExpired($jadwal)) {
+      echo "Jadwal sudah habis.";
+      unset($_SESSION['temp_booking']);
+      return;
+    }
+
     $film = $filmModel->getFilmById($jadwal['film_id']);
 
     // Calculate total price based on payment method
@@ -186,7 +226,7 @@ class BookingController
     $booking_ids = $bookingModel->createBookingMultipleSeats($user_id, $jadwal_id, $kursi_ids);
 
     if (!$booking_ids) {
-      echo "Gagal membuat booking.";
+      echo "Gagal membuat booking. Kursi kemungkinan sudah dipilih user lain atau jadwal sudah habis.";
       return;
     }
 
@@ -232,35 +272,49 @@ class BookingController
     $bookingModel = new BookingModel();
     $jadwalModel = new JadwalModel();
     $filmModel = new FilmModel();
+    $paymentModel = new PaymentModel();
 
-    // Get booking details (simplified - in real app, get all related bookings)
-    $booking = $bookingModel->getBookingsByUserId($_SESSION['user_id']);
-    $booking = array_filter($booking, function ($b) use ($booking_id) {
-      return $b['booking_id'] == $booking_id;
-    });
-    $booking = reset($booking);
+    // Get the specific booking
+    $booking = $bookingModel->getBookingById($booking_id);
 
-    if (!$booking) {
+    if (!$booking || $booking['user_id'] != $_SESSION['user_id']) {
       echo "Booking tidak ditemukan.";
       return;
     }
 
-    // Calculate total payment including admin fee
-    $paymentModel = new PaymentModel();
-    $allPayments = $paymentModel->getAllPayments();
+    // Get jadwal and film info
+    $jadwal = $jadwalModel->getJadwalById($booking['jadwal_id']);
+    $film = $filmModel->getFilmById($jadwal['film_id']);
 
-    // Find all payments for this booking (there might be multiple seats)
-    $relatedPayments = array_filter($allPayments, function ($p) use ($booking_id) {
-      return $p['booking_id'] == $booking_id;
+    // Get studio info by joining with studio table
+    $studioModel = new StudioModel();
+    $studio = $studioModel->getStudioById($jadwal['studio_id']);
+    $jadwal['nama_studio'] = $studio['nama_studio'] ?? 'N/A';
+    $jadwal['tipe'] = $studio['tipe'] ?? 'N/A';
+
+    // Get all bookings in the same transaction (exact timestamp + jadwal)
+    $relatedBookings = $bookingModel->getTransactionBookings(
+      $_SESSION['user_id'],
+      $jadwal['jadwal_id'],
+      $booking['tanggal_booking']
+    );
+
+    // Get payment info for all related bookings
+    $payments = $paymentModel->getAllPayments();
+    $bookingPayments = array_filter($payments, function ($p) use ($relatedBookings) {
+      foreach ($relatedBookings as $booking) {
+        if ($p['booking_id'] == $booking['booking_id']) {
+          return true;
+        }
+      }
+      return false;
     });
 
-    $payment = reset($relatedPayments);
+    // Calculate admin fee based on payment method (use first payment found)
     $admin_fee = 0;
-    $total_ticket_price = 0;
-
-    if ($payment && isset($payment['nama_method'])) {
-      // Calculate admin fee based on payment method
-      switch ($payment['nama_method']) {
+    $firstPayment = reset($bookingPayments);
+    if ($firstPayment) {
+      switch ($firstPayment['nama_method']) {
         case 'e_wallet':
           $admin_fee = 2500;
           break;
@@ -268,14 +322,32 @@ class BookingController
           $admin_fee = 5000;
           break;
       }
-
-      // Sum up all ticket prices for this booking session
-      foreach ($relatedPayments as $p) {
-        $total_ticket_price += $p['jumlah_bayar'];
-      }
     }
 
-    // Generate barcode
+    // Collect all seat numbers and booking IDs
+    $allSeats = [];
+    $allBookingIds = [];
+    foreach ($relatedBookings as $b) {
+      $allSeats[] = $b['nomor_kursi'];
+      $allBookingIds[] = $b['booking_id'];
+    }
+
+    // Calculate total ticket price (base price for all seats)
+    $total_ticket_price = $jadwal['harga_tiket'] * count($allSeats);
+
+    // Prepare booking data for the template - multiple bookings
+    $bookingData = [
+      'judul' => $film['judul'] ?? 'N/A',
+      'tanggal' => $jadwal['tanggal'] ?? '',
+      'jam_mulai' => $jadwal['jam_mulai'] ?? '',
+      'nama_studio' => $jadwal['nama_studio'] ?? 'N/A',
+      'tipe' => $jadwal['tipe'] ?? 'N/A',
+      'nomor_kursi' => implode(', ', $allSeats),
+      'booking_ids' => $allBookingIds,
+      'seat_count' => count($allSeats)
+    ];
+
+    // Generate barcode using the first booking ID
     require_once __DIR__ . '/../../vendor/autoload.php';
     $generator = new Picqer\Barcode\BarcodeGeneratorPNG();
     $barcode = base64_encode($generator->getBarcode($booking_id, $generator::TYPE_CODE_128));

@@ -1,0 +1,29 @@
+[
+    {
+        "id": 1,
+        "image": "public/uploads/dune.jpg",
+        "title": "Nikmati Pengalaman Nonton",
+        "subtitle": "Temukan film terbaru dan jadwal bioskop favoritmu.",
+        "button_text": "Pesan Tiket Sekarang",
+        "button_link": "index.php?controller=user&action=pesanan",
+        "sort_order": 1
+    },
+    {
+        "id": 2,
+        "image": "public/uploads/star.jpg",
+        "title": "Pengalaman Sinema Tanpa Antre",
+        "subtitle": "Booking kursi lebih cepat langsung dari rumah.",
+        "button_text": "Pilih Jadwal",
+        "button_link": "index.php?controller=user&action=pesanan",
+        "sort_order": 2
+    },
+    {
+        "id": 3,
+        "image": "public/uploads/gost.jpg",
+        "title": "Beli Tiket Online Sekarang",
+        "subtitle": "Aman, praktis, dan langsung dapat e-ticket.",
+        "button_text": "Mulai Booking",
+        "button_link": "index.php?controller=user&action=pesanan",
+        "sort_order": 3
+    }
+]

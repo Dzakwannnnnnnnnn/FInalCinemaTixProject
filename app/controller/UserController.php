@@ -8,6 +8,7 @@ require_once __DIR__ . '/../model/NewsModel.php';
 require_once __DIR__ . '/../model/BookingModel.php';
 require_once __DIR__ . '/../model/PaymentModel.php';
 require_once __DIR__ . '/../model/JadwalModel.php';
+require_once __DIR__ . '/../model/SiteContentModel.php';
 
 class UserController
 {
@@ -78,23 +79,47 @@ class UserController
     include __DIR__ . '/../view/users/beritaEvent.php';
   }
 
-  public function detailBerita()
+  public function about()
   {
-    $news_id = $_GET['id'] ?? null;
-    if (!$news_id) {
-      header('Location: index.php?controller=user&action=beritaEvent');
-      exit;
-    }
+    $siteContentModel = new SiteContentModel();
+    $aboutContent = $siteContentModel->getSection('about');
+    $contactContent = $siteContentModel->getSection('contact');
 
-    $newsModel = new NewsModel();
-    $news = $newsModel->getNewsById($news_id);
+    include __DIR__ . '/../view/users/about.php';
+  }
 
-    if (!$news) {
-      header('Location: index.php?controller=user&action=beritaEvent');
-      exit;
-    }
+  public function detailBerita(){
+      // Ganti startSession() dengan session_start() langsung
+      if (session_status() == PHP_SESSION_NONE) {
+          session_start();
+      }
+      
+      // Debug - cek session
+      echo "<script>console.log('Session user_id:', '" . ($_SESSION['user_id'] ?? 'not set') . "')</script>";
+      
+      // Check if user is logged in
+      if (!isset($_SESSION['user_id'])) {
+          // Redirect ke login dengan pesan
+          $_SESSION['login_message'] = 'Silakan login untuk mengakses halaman ini';
+          header('Location: index.php?controller=auth&action=login');
+          exit;
+      }
 
-    include __DIR__ . '/../view/users/detail_berita.php';
+      $news_id = $_GET['id'] ?? null;
+      if (!$news_id) {
+          header('Location: index.php?controller=user&action=beritaEvent');
+          exit;
+      }
+
+      $newsModel = new NewsModel();
+      $news = $newsModel->getNewsById($news_id);
+
+      if (!$news) {
+          header('Location: index.php?controller=user&action=beritaEvent');
+          exit;
+      }
+
+      include __DIR__ . '/../view/users/detail_berita.php';
   }
 
   public function purchaseHistory()
@@ -107,56 +132,40 @@ class UserController
     }
 
     $bookingModel = new BookingModel();
-    $paymentModel = new PaymentModel();
-    $jadwalModel = new JadwalModel();
-    $filmModel = new FilmModel();
+    $userId = (int) $_SESSION['user_id'];
+    // Keep history concise: remove data older than 10 days.
+    $bookingModel->cleanupOldBookingsByUser($userId, 10);
 
-    // Get user's completed bookings (those with payments)
-    $bookings = $bookingModel->getBookingsByUserId($_SESSION['user_id']);
+    $transactions = $bookingModel->getGroupedPurchaseHistoryByUserId($userId);
     $purchaseHistory = [];
 
-    foreach ($bookings as $booking) {
-      // Get payment details for this booking
-      $payments = $paymentModel->getAllPayments();
-      $bookingPayments = array_filter($payments, function ($p) use ($booking) {
-        return $p['booking_id'] == $booking['booking_id'];
-      });
-
-      if (!empty($bookingPayments)) {
-        // Get schedule details
-        $jadwal = $jadwalModel->getJadwalById($booking['jadwal_id']);
-        if ($jadwal) {
-          $film = $filmModel->getFilmById($jadwal['film_id']);
-
-          // Calculate total payment
-          $totalAmount = 0;
-          $adminFee = 0;
-          foreach ($bookingPayments as $payment) {
-            $totalAmount += $payment['jumlah_bayar'];
-            // Calculate admin fee based on payment method
-            switch ($payment['nama_method']) {
-              case 'e_wallet':
-                $adminFee = 2500;
-                break;
-              case 'credit_card':
-                $adminFee = 5000;
-                break;
-            }
-          }
-
-          $purchaseHistory[] = [
-            'booking_id' => $booking['booking_id'],
-            'film_title' => $film ? $film['judul'] : 'Unknown Film',
-            'jadwal_date' => $jadwal['tanggal'],
-            'jadwal_time' => $jadwal['jam_mulai'],
-            'studio' => $jadwal['nama_studio'] ?? 'Unknown Studio',
-            'seat' => $booking['nomor_kursi'],
-            'total_amount' => $totalAmount,
-            'admin_fee' => $adminFee,
-            'purchase_date' => $booking['created_at'] ?? date('Y-m-d H:i:s')
-          ];
-        }
+    foreach ($transactions as $trx) {
+      $adminFee = 0;
+      switch ($trx['payment_method']) {
+        case 'e_wallet':
+          $adminFee = 2500;
+          break;
+        case 'credit_card':
+          $adminFee = 5000;
+          break;
       }
+
+      $bookingIds = array_filter(explode(',', $trx['booking_ids'] ?? ''));
+      $firstBookingId = !empty($bookingIds) ? $bookingIds[0] : null;
+
+      $purchaseHistory[] = [
+        'booking_id' => $firstBookingId,
+        'booking_ids' => $bookingIds,
+        'seat_count' => (int) ($trx['seat_count'] ?? 0),
+        'film_title' => $trx['film_title'] ?? 'Unknown Film',
+        'jadwal_date' => $trx['jadwal_date'] ?? '',
+        'jadwal_time' => $trx['jadwal_time'] ?? '',
+        'studio' => $trx['studio'] ?? 'Unknown Studio',
+        'seat' => $trx['seats'] ?? '',
+        'total_amount' => (float) ($trx['ticket_total'] ?? 0),
+        'admin_fee' => $adminFee,
+        'purchase_date' => $trx['purchase_date'] ?? date('Y-m-d H:i:s')
+      ];
     }
 
     // Sort by purchase date (newest first)

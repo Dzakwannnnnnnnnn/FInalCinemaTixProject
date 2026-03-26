@@ -9,7 +9,7 @@ require_once __DIR__ . '/../../../functions.php';
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title><?php echo htmlspecialchars($news['judul_news'] ?? 'Detail Berita'); ?> - CinemaTix</title>
-  <link rel="icon" type="image/png" href="public/favicon.ico">
+  <link rel="icon" type="image/png" href="public/favicon.png">
   <style>
     * {
       margin: 0;
@@ -287,7 +287,19 @@ require_once __DIR__ . '/../../../functions.php';
         <li><a href="index.php?controller=user&action=beritaEvent">Berita & Event</a></li>
       </ul>
     </nav>
-    <a href="index.php?controller=auth&action=login" class="btn-login">Masuk / Daftar</a>
+    <?php if (isLoggedIn()): ?>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span style="color: #fff; font-weight:bold;">Halo,
+          <?= isset($_SESSION['user_name']) ? htmlspecialchars($_SESSION['user_name']) : 'User' ?>!</span>
+        <?php if (isAdmin()): ?>
+          <a href="index.php?controller=admin&action=index" class="btn-login"
+            style="background: #ffcc00; color: #000; padding: 6px 12px;">Admin Panel</a>
+        <?php endif; ?>
+        <a href="index.php?controller=auth&action=logout" class="btn-login">Logout</a>
+      </div>
+    <?php else: ?>
+      <a href="index.php?controller=auth&action=login" class="btn-login">Masuk / Daftar</a>
+    <?php endif; ?>
   </header>
 
   <!-- Main Content -->
